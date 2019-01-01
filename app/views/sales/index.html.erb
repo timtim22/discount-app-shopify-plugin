@@ -1,0 +1,47 @@
+<br/>
+<aside>
+  <%= link_to 'New Sale', new_sale_path, class: 'button' %>
+</aside>
+<br/>
+
+<section>
+  <article>
+    <div class="card">
+      <article>
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Target</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Start time</th>
+            <th>End time</th>
+            <th>Status</th>
+            <th colspan="3"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% @sales.each do |sale| %>
+            <tr>
+              <td><%= sale.title %></td>
+              <td><%= sale.sale_target %></td>
+              <td><%= sale.amount %></td>
+              <td><%= sale.sale_type %></td>
+              <td><%= sale.start_time ? sale.start_time : "-" %></td>
+              <td><%= sale.end_time ? sale.end_time : "-"  %></td>
+              <td><span class="tag <%= ['green', 'yellow', 'blue'][Sale.statuses[sale.status]] %>"><%= sale.status %></span></td>
+              <td><%= link_to sale do %><i class="icon-preview"></i><% end %></td>
+              <td><%= link_to edit_sale_path(sale) do %><i class="icon-edit"></i><% end %></td>
+              <td><%= link_to sale, method: :delete, data: { confirm: 'Are you sure?' } do %><i class="icon-trash"></i><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      </article>
+    </div>
+  </article>
+  <br>
+
+</section>

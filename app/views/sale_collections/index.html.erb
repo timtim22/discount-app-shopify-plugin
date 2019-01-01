@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Sale Collections</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sale</th>
+      <th>Collection</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @sale_collections.each do |sale_collection| %>
+      <tr>
+        <td><%= sale_collection.sale %></td>
+        <td><%= sale_collection.collection_id %></td>
+        <td><%= link_to 'Show', sale_collection %></td>
+        <td><%= link_to 'Edit', edit_sale_collection_path(sale_collection) %></td>
+        <td><%= link_to 'Destroy', sale_collection, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Sale Collection', new_sale_collection_path %>

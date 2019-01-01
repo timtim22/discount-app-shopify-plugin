@@ -1,0 +1,2 @@
+module SaleCollectionsHelper
+end

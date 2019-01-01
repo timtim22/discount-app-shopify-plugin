@@ -1,0 +1,99 @@
+<br/>
+<section>
+  <article>
+    <div class="card">
+      <p>
+        <strong>Status:</strong>
+        <%= @sale.status %>
+      </p>
+
+      <p>
+        <strong>Title:</strong>
+        <%= @sale.title %>
+      </p>
+
+      <p>
+        <strong>Amount:</strong>
+        <%= @sale.amount %>
+      </p>
+
+      <p>
+        <strong>Type:</strong>
+        <%= @sale.sale_type %>
+      </p>
+
+      <% if @sale.Scheduled? %>
+        <p>
+          <strong>Start time:</strong>
+          <%= @sale.start_time %>
+        </p>
+
+        <p>
+          <strong>End time:</strong>
+          <%= @sale.end_time %>
+        </p>
+      <% end %>
+
+      <p>
+        <strong>Target:</strong>
+        <%= @sale.sale_target %>
+      </p>
+
+      <% if @sale.sale_target == "Specific collections" %>
+        <%= render 'sale_collections/form', sale_collection: @sale_collection %>
+        <% if !@sale_collections.empty? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Collection</th>
+                <th colspan="1"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% @sale_collections.each do |sale_collection| %>
+                <tr>
+                  <td><%= ShopifyAPI::CustomCollection.where(id: sale_collection.collection_id).first.title %></td>
+                  <td><%= link_to sale_collection, method: :delete, data: { confirm: 'Are you sure?' } do %>
+                        <i class="icon-trash"></i>
+                      <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+        <% end %>
+
+      <% elsif @sale.sale_target == "Specific products" %>
+        <%= render 'sale_products/form', sale_product: @sale_product %>
+        <% if !@sale_products.empty? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th colspan="1"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% @sale_products.each do |sale_product| %>
+                <tr>
+                  <td><%= ShopifyAPI::Product.where(id: sale_product.product_id).first.title %></td>
+                  <td><%= link_to sale_product, method: :delete, data: { confirm: 'Are you sure?' } do %>
+                        <i class="icon-trash"></i>
+                      <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+        <% end %>
+      <% end %>
+
+      <%= link_to 'Edit', edit_sale_path(@sale) %> |
+      <%= link_to 'Back', sales_path %>
+    </div>
+  </article>
+</section>
