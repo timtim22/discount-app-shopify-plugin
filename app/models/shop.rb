@@ -1,5 +1,5 @@
 class Shop < ActiveRecord::Base
-	has_many :sale
+	has_many :sale, :dependent => :delete_all
 	
   include ShopifyApp::SessionStorage
   

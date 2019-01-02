@@ -1,7 +1,7 @@
 class Sale < ApplicationRecord
   belongs_to :shop
-  has_many :sale_collection
-  has_many :sale_products
+  has_many :sale_collection, :dependent => :delete_all
+  has_many :sale_products, :dependent => :delete_all
 
 	enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
 	enum sale_type: [ 'Percentage', 'Fixed Amount Off' ]
