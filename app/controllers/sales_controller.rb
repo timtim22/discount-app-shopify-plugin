@@ -4,7 +4,7 @@ class SalesController < ShopifyApp::AuthenticatedController
   # GET /sales
   # GET /sales.json
   def index
-    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.domain).id)
+    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.myshopify_domain).id)
   end
 
   # GET /sales/1
@@ -40,7 +40,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.save
         if @sale.Enabled?
-          @sale.activate_sale
+          ActivateSaleJob.perform_now(@sale.id)
         elsif @sale.Scheduled?
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
@@ -70,12 +70,12 @@ class SalesController < ShopifyApp::AuthenticatedController
         end
         @sale.save
         if @sale.Enabled?
-          @sale.activate_sale
+          ActivateSaleJob.perform_now(@sale.id)
         elsif @sale.Scheduled?
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
         elsif @sale.Disabled? && check
-          @sale.deactivate_sale          
+          DeactivateSaleJob.perform_now(@sale.id)        
         end
         format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
         format.json { render :show, status: :ok, location: @sale }
