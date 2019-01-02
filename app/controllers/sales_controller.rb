@@ -40,7 +40,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.save
         if @sale.Enabled?
-          ActivateSaleJob.perform_now(@sale.id)
+          ActivateSaleJob.perform_later(@sale.id)
         elsif @sale.Scheduled?
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
@@ -70,12 +70,12 @@ class SalesController < ShopifyApp::AuthenticatedController
         end
         @sale.save
         if @sale.Enabled?
-          ActivateSaleJob.perform_now(@sale.id)
+          ActivateSaleJob.perform_later(@sale.id)
         elsif @sale.Scheduled?
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
         elsif @sale.Disabled? && check
-          DeactivateSaleJob.perform_now(@sale.id)        
+          DeactivateSaleJob.perform_later(@sale.id)        
         end
         format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
         format.json { render :show, status: :ok, location: @sale }
