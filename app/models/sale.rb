@@ -53,6 +53,7 @@ class Sale < ApplicationRecord
     	end
     	product.save
     end
+    return
 	end
 
 	def deactivate_sale
@@ -69,12 +70,13 @@ class Sale < ApplicationRecord
 	    			variant.compare_at_price = nil
 	    		else
 	    			variant.price = old_price.old_price
+		    		old_price.destroy
 	    		end
-	    		old_price.destroy
     		end
     	end
     	product.save
     end
+    return
   end
 
 end
