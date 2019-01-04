@@ -15,7 +15,7 @@
 
   <div class="field">
     <%= form.label :select_product %>
-    <%= form.select :product_id, options_from_collection_for_select(ShopifyAPI::Product.all, "id", "title"), prompt: "Select collection" %>
+    <%= form.select :product_id, options_from_collection_for_select(ShopifyAPI::Product.find(:all, :params => {:limit => 250}), "id", "title"), prompt: "Select collection" %>
   </div>
   <br/>
   <div class="actions">
