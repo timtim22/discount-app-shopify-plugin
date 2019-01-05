@@ -94,7 +94,7 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_left > 5
+					if ShopifyAPI.credit_left < 5
 						sleep 15.seconds
 						puts "Sleeping"
 					end
@@ -138,7 +138,7 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_left > 5
+					if ShopifyAPI.credit_left < 5
 						sleep 15.seconds
 						puts "Sleeping"
 					end
