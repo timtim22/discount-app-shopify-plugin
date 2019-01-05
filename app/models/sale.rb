@@ -82,13 +82,38 @@ class Sale < ApplicationRecord
 
 	def activate_sale
 		if sale_target == 'Whole Store'
-			count = ShopifyAPI::Product.count
+			#count = ShopifyAPI::Product.count
+			#page = 1
+			#while count > 0
+			#	products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page, :fields => "id,variants"})
+			#	self.put_on_sale(products)
+			#	count -= 250
+			#	page += 1
+			#end
+			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
-			while count > 0
-				products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page})
-				self.put_on_sale(products)
-				count -= 250
+			while !variants.empty?
+				variants.each do |variant|
+					if variant.price.to_f > 0
+						if variant.compare_at_price.nil?
+	    				variant.compare_at_price = variant.price
+	    			end
+		    		old_price = OldPrice.find_by(sale_id: id, variant_id: variant.id.to_s)
+		    		if old_price.nil?
+		    			old_price = OldPrice.new(sale_id: id, variant_id: variant.id.to_s, old_price: variant.price).save
+			    		if Percentage?
+			  				variant.price = ((100-amount)*variant.price.to_f)/100
+			  			else
+			  				variant.price = variant.price.to_f - amount
+			  			end
+			  		else
+			  			variant.price = old_price.old_price
+				  	end
+				  	variant.save
+			  	end
+				end
 				page += 1
+				variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
 			end
 		end
 		return
@@ -96,13 +121,31 @@ class Sale < ApplicationRecord
 
 	def deactivate_sale
 		if sale_target == 'Whole Store'
-			count = ShopifyAPI::Product.count
+			#count = ShopifyAPI::Product.count
+			#page = 1
+			#while count > 0
+			#	products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page})
+			#	self.remove_from_sale(products)
+			#	count -= 250
+			#	page += 1
+			#end
+			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
-			while count > 0
-				products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page})
-				self.remove_from_sale(products)
-				count -= 250
+			while !variants.empty?
+				variants.each do |variant|
+					if !variant.compare_at_price
+		  			puts "Something went wrong"    			
+		  		else
+		  			old_price = OldPrice.find_by(sale_id: id, variant_id: variant.id.to_s)
+		  			if !old_price.nil?
+		    			variant.price = old_price.old_price
+			    		old_price.destroy
+		    		end
+		  		end
+		  		variant.save
+				end
 				page += 1
+				variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
 			end
 		end
 		return
