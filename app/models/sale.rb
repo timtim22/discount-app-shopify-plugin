@@ -111,7 +111,7 @@ class Sale < ApplicationRecord
 			  				variant.price = variant.price.to_f - amount
 			  			end
 			  			variant.save
-			  		elsif variant.price != old_price.old_price
+			  		elsif variant.price.to_f != old_price.old_price
 			  			variant.price = old_price.old_price
 							variant.save
 				  	end
