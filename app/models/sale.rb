@@ -94,8 +94,8 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_left < 5
-						sleep 15.seconds
+					if ShopifyAPI.credit_maxed?
+						sleep 10.seconds
 						puts "Sleeping"
 					end
 					if variant.price.to_f > 0
@@ -111,9 +111,13 @@ class Sale < ApplicationRecord
 			  				variant.price = variant.price.to_f - amount
 			  			end
 			  			variant.save
-			  		elsif variant.price.to_f != old_price.old_price
-			  			variant.price = old_price.old_price
-							variant.save
+			  		elsif variant.price.to_f == old_price.old_price
+			  			if Percentage?
+			  				variant.price = ((100-amount)*variant.price.to_f)/100
+			  			else
+			  				variant.price = variant.price.to_f - amount
+			  			end
+			  			variant.save
 				  	end
 			  	end
 				end
@@ -138,8 +142,8 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_left < 5
-						sleep 15.seconds
+					if ShopifyAPI.credit_maxed?
+						sleep 10.seconds
 						puts "Sleeping"
 					end
 					if !variant.compare_at_price
