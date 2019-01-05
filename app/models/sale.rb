@@ -94,6 +94,10 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
+					if ShopifyAPI.credit_left > 5
+						sleep 15.seconds
+						puts "Sleeping"
+					end
 					if variant.price.to_f > 0
 						if variant.compare_at_price.nil?
 	    				variant.compare_at_price = variant.price
@@ -106,10 +110,11 @@ class Sale < ApplicationRecord
 			  			else
 			  				variant.price = variant.price.to_f - amount
 			  			end
-			  		else
+			  			variant.save
+			  		elsif variant.price != old_price.old_price
 			  			variant.price = old_price.old_price
+							variant.save
 				  	end
-				  	variant.save
 			  	end
 				end
 				page += 1
@@ -133,16 +138,20 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
+					if ShopifyAPI.credit_left > 5
+						sleep 15.seconds
+						puts "Sleeping"
+					end
 					if !variant.compare_at_price
 		  			puts "Something went wrong"    			
 		  		else
 		  			old_price = OldPrice.find_by(sale_id: id, variant_id: variant.id.to_s)
 		  			if !old_price.nil?
 		    			variant.price = old_price.old_price
+		    			variant.save
 			    		old_price.destroy
 		    		end
 		  		end
-		  		variant.save
 				end
 				page += 1
 				variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
