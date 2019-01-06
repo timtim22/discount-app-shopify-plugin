@@ -13,7 +13,9 @@ while !vs.empty?
 			errors += [v.id]
 		end
 	end
-	
+
 	page += 1
 	vs = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
 end
+
+# OldPrice.count = 1149

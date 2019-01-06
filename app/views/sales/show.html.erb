@@ -40,20 +40,32 @@
       </p>
 
       <% if @sale.sale_target == "Specific collections" %>
-        <%= render 'sale_collections/form', sale_collection: @sale_collection %>
+        <% if @sale.Disabled? %>
+          <%= render 'sale_collections/form', sale_collection: @sale_collection %>
+        <% end %>
         <% if !@sale_collections.empty? %>
           <table>
             <thead>
               <tr>
-                <th>Collection</th>
+                <th>Collections</th>
                 <th colspan="1"></th>
               </tr>
             </thead>
 
             <tbody>
               <% @sale_collections.each do |sale_collection| %>
+                <%begin
+                    sale_title = ShopifyAPI::CustomCollection.find(sale_collection.collection_id, params: {fields: "title"}).title 
+                  rescue
+                    begin
+                      sale_title = ShopifyAPI::SmartCollection.find(sale_collection.collection_id, params: {fields: "title"}).title
+                    rescue
+                      sale_collection.destroy
+                      sale_title = "This collection does not exist in your shop."
+                    end
+                  end %>
                 <tr>
-                  <td><%= ShopifyAPI::CustomCollection.where(id: sale_collection.collection_id).first.title %></td>
+                  <td><%= sale_title %></td>
                   <td><%= link_to sale_collection, method: :delete, data: { confirm: 'Are you sure?' } do %>
                         <i class="icon-trash"></i>
                       <% end %>
@@ -66,12 +78,14 @@
         <% end %>
 
       <% elsif @sale.sale_target == "Specific products" %>
-        <%= render 'sale_products/form', sale_product: @sale_product %>
+        <% if @sale.Disabled? %>
+          <%= render 'sale_products/form', sale_product: @sale_product %>
+        <% end %>
         <% if !@sale_products.empty? %>
           <table>
             <thead>
               <tr>
-                <th>Product</th>
+                <th>Products</th>
                 <th colspan="1"></th>
               </tr>
             </thead>
@@ -79,7 +93,7 @@
             <tbody>
               <% @sale_products.each do |sale_product| %>
                 <tr>
-                  <td><%= ShopifyAPI::Product.where(id: sale_product.product_id).first.title %></td>
+                  <td><%= ShopifyAPI::Product.find(sale_product.product_id, params: {fields: 'title'}).title %></td>
                   <td><%= link_to sale_product, method: :delete, data: { confirm: 'Are you sure?' } do %>
                         <i class="icon-trash"></i>
                       <% end %>

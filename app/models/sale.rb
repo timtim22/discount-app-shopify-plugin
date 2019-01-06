@@ -8,7 +8,7 @@ class Sale < ApplicationRecord
 	enum status: ['Enabled', 'Disabled', 'Scheduled']
 	validates :title, presence: true
 	validates :amount, presence: true
-
+=begin
 	def gather_products
 		if sale_target == 'Whole Store'
 			products = ShopifyAPI::Product.find(:all, :params => {:limit => 250})
@@ -79,17 +79,9 @@ class Sale < ApplicationRecord
     end
     return
 	end
-
+=end
 	def activate_sale
 		if sale_target == 'Whole Store'
-			#count = ShopifyAPI::Product.count
-			#page = 1
-			#while count > 0
-			#	products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page, :fields => "id,variants"})
-			#	self.put_on_sale(products)
-			#	count -= 250
-			#	page += 1
-			#end
 			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
 			while !variants.empty?
@@ -124,20 +116,60 @@ class Sale < ApplicationRecord
 				page += 1
 				variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
 			end
+
+		elsif sale_target == 'Specific collections'
+			collections = SaleCollection.where(sale_id: id).pluck(:collection_id)
+			if collections.empty?
+				return -1
+			end
+			collections.each do |collection|
+				products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants"})
+				page = 1
+				while !products.empty?
+					products.each do |product|
+						if ShopifyAPI.credit_maxed?
+							sleep 10.seconds
+							puts "Sleeping"
+						end
+						to_save = false
+	    			product.variants.each do |variant|
+			    		if variant.price.to_f > 0
+			    			if variant.compare_at_price.nil? || variant.compare_at_price < variant.price
+			    				variant.compare_at_price = variant.price
+			    			end
+				    		old_price = OldPrice.find_by(sale_id: id, variant_id: variant.id.to_s)
+				    		if old_price.nil?
+				    			old_price = OldPrice.new(sale_id: id, variant_id: variant.id.to_s, old_price: variant.price).save
+					    		if Percentage?
+					  				variant.price = ((100-amount)*variant.price.to_f)/100
+					  			else
+					  				variant.price = variant.price.to_f - amount
+					  			end
+					  			to_save = true
+					  		elsif variant.price.to_f == old_price.old_price
+					  			if Percentage?
+					  				variant.price = ((100-amount)*variant.price.to_f)/100
+					  			else
+					  				variant.price = variant.price.to_f - amount
+					  			end
+					  			to_save = true
+						  	end
+					  	end
+			    	end
+			    	if to_save
+			    		product.save
+			    	end
+			    end
+			    page += 1
+		    	products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants", page: page})
+			  end
+			end
 		end
 		return
 	end
 
 	def deactivate_sale
 		if sale_target == 'Whole Store'
-			#count = ShopifyAPI::Product.count
-			#page = 1
-			#while count > 0
-			#	products = ShopifyAPI::Product.find(:all, :params => {:limit => 250, :page=> page})
-			#	self.remove_from_sale(products)
-			#	count -= 250
-			#	page += 1
-			#end
 			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
 			while !variants.empty?
@@ -159,6 +191,42 @@ class Sale < ApplicationRecord
 				end
 				page += 1
 				variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price", page: page})
+			end
+
+		elsif sale_target == 'Specific collections'
+			collections = SaleCollection.where(sale_id: id).pluck(:collection_id)
+			if collections.empty?
+				return -1
+			end
+			collections.each do |collection|
+				products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants"})
+				page = 1
+				while !products.empty?
+					products.each do |product|
+						if ShopifyAPI.credit_maxed?
+							sleep 10.seconds
+							puts "Sleeping"
+						end
+						to_save = false
+	    			product.variants.each do |variant|
+			    		if !variant.compare_at_price
+				  			puts "Something went wrong"    			
+				  		else
+				  			old_price = OldPrice.find_by(sale_id: id, variant_id: variant.id.to_s)
+				  			if !old_price.nil?
+				    			variant.price = old_price.old_price
+				    			to_save = true
+					    		old_price.destroy
+				    		end
+				  		end
+			    	end
+			    	if to_save
+			    		product.save
+			    	end
+			    end
+			    page += 1
+		    	products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants", page: page})
+			  end
 			end
 		end
 		return

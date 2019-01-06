@@ -13,6 +13,8 @@ class SalesController < ShopifyApp::AuthenticatedController
     if @sale.sale_target == "Specific collections"
       @sale_collection = SaleCollection.new
       @sale_collections = SaleCollection.where(sale_id: @sale.id)
+      @store_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', fields: 'id,title'}) +
+        ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', fields: 'id,title'})
     elsif @sale.sale_target == "Specific products"
       @sale_product = SaleProduct.new
       @sale_products = SaleProduct.where(sale_id: @sale.id)
