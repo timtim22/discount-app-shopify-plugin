@@ -34,7 +34,7 @@ class SalesController < ShopifyApp::AuthenticatedController
   # POST /sales.json
   def create
     @sale = Sale.new(sale_params)
-    @sale.shop_id = Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.domain).id
+    @sale.shop_id = Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.myshopify_domain).id
     if !@sale.Scheduled?
       @sale.start_time = nil
       @sale.end_time = nil
