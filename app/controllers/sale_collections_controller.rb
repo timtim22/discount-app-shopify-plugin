@@ -4,7 +4,23 @@ class SaleCollectionsController < ShopifyApp::AuthenticatedController
   # GET /sale_collections
   # GET /sale_collections.json
   def index
-    @sale_collections = SaleCollection.all
+    @sale_collections = SaleCollection.where(sale_id: params[:format])
+    @sale = Sale.find(params[:format])
+    @sale_collection = SaleCollection.new
+    temp = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', fields: 'id,title'})
+    page = 1
+    while temp.length == 250
+      page += 1
+      temp += ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', fields: 'id,title', page: page})
+    end
+    @store_collections = temp
+    temp = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', fields: 'id,title'})
+    page = 1
+    while temp.length == 250
+      page += 1
+      temp += ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', fields: 'id,title', page: page})
+    end
+    @store_collections += temp
   end
 
   # GET /sale_collections/1
@@ -28,7 +44,7 @@ class SaleCollectionsController < ShopifyApp::AuthenticatedController
 
     respond_to do |format|
       if @sale_collection.save
-        format.html { redirect_to @sale_collection.sale, notice: 'Sale collection was successfully added.' }
+        format.html { redirect_to sale_collections_path(@sale_collection.sale.id), notice: 'Sale collection was successfully added.' }
         format.json { render :show, status: :created, location: @sale_collection }
       else
         format.html { render :new }
@@ -54,10 +70,10 @@ class SaleCollectionsController < ShopifyApp::AuthenticatedController
   # DELETE /sale_collections/1
   # DELETE /sale_collections/1.json
   def destroy
-    sale = @sale_collection.sale
+    sale_id = @sale_collection.sale.id
     @sale_collection.destroy
     respond_to do |format|
-      format.html { redirect_to sale, notice: 'Sale collection was successfully removed.' }
+      format.html { redirect_to sale_collections_path(sale_id), notice: 'Sale collection was successfully removed.' }
       format.json { head :no_content }
     end
   end
@@ -70,6 +86,6 @@ class SaleCollectionsController < ShopifyApp::AuthenticatedController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def sale_collection_params
-      params.require(:sale_collection).permit(:sale_id, :collection_id)
+      params.require(:sale_collection).permit(:sale_id, :collection_id, :collection_title)
     end
 end

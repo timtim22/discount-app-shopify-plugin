@@ -1,9 +1,0 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-one:
-  sale: one
-  product_id: MyString
-
-two:
-  sale: two
-  product_id: MyString

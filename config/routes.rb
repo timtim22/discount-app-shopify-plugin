@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  resources :sale_products
   resources :sale_collections
   resources :sales
   root :to => 'sales#index'

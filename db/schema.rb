@@ -44,17 +44,10 @@ ActiveRecord::Schema.define(version: 2019_01_01_042335) do
   create_table "sale_collections", force: :cascade do |t|
     t.bigint "sale_id"
     t.string "collection_id"
+    t.string "collection_title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sale_id"], name: "index_sale_collections_on_sale_id"
-  end
-
-  create_table "sale_products", force: :cascade do |t|
-    t.bigint "sale_id"
-    t.string "product_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["sale_id"], name: "index_sale_products_on_sale_id"
   end
 
   create_table "sales", force: :cascade do |t|
@@ -81,5 +74,4 @@ ActiveRecord::Schema.define(version: 2019_01_01_042335) do
 
   add_foreign_key "old_prices", "sales"
   add_foreign_key "sale_collections", "sales"
-  add_foreign_key "sale_products", "sales"
 end

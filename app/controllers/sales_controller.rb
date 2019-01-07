@@ -4,7 +4,8 @@ class SalesController < ShopifyApp::AuthenticatedController
   # GET /sales
   # GET /sales.json
   def index
-    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.myshopify_domain).id)
+    @shop = ShopifyAPI::Shop.current
+    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: @shop.myshopify_domain).id)
   end
 
   # GET /sales/1
@@ -13,17 +14,13 @@ class SalesController < ShopifyApp::AuthenticatedController
     if @sale.sale_target == "Specific collections"
       @sale_collection = SaleCollection.new
       @sale_collections = SaleCollection.where(sale_id: @sale.id)
-      @store_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', fields: 'id,title'}) +
-        ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', fields: 'id,title'})
-    elsif @sale.sale_target == "Specific products"
-      @sale_product = SaleProduct.new
-      @sale_products = SaleProduct.where(sale_id: @sale.id)
     end
   end
 
   # GET /sales/new
   def new
     @sale = Sale.new
+    @currency = ShopifyAPI::Shop.current.currency
   end
 
   # GET /sales/1/edit
@@ -41,17 +38,17 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
     respond_to do |format|
       if @sale.save
-        if @sale.Enabled?
-          ActivateSaleJob.perform_later(@sale.id)
-        elsif @sale.Scheduled?
+        if @sale.Scheduled?
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
         end
-        format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
-        format.json { render :show, status: :created, location: @sale }
+        if @sale.sale_target == 'Specific collections'
+          format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
+        else
+          format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
+        end
       else
         format.html { render :new }
-        format.json { render json: @sale.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -79,8 +76,11 @@ class SalesController < ShopifyApp::AuthenticatedController
         elsif @sale.Disabled? && check
           DeactivateSaleJob.perform_later(@sale.id)        
         end
-        format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
-        format.json { render :show, status: :ok, location: @sale }
+        if @sale.sale_target == 'Specific collections'
+          format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
+        else
+          format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
+        end
       else
         format.html { render :edit }
         format.json { render json: @sale.errors, status: :unprocessable_entity }

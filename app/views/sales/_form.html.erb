@@ -1,18 +1,102 @@
 <section>
   <article>
     <%= form_with(model: sale, local: true) do |form| %>
+      <% puts "Sale id: " + sale.id.to_s %>
       <% if sale.errors.any? %>
-        <div id="error_explanation">
-          <h2><%= pluralize(sale.errors.count, "error") %> prohibited this sale from being saved:</h2>
-
-          <ul>
-          <% sale.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-          </ul>
+        <div class="alert error" id="error_explanation">
+          <dl>
+            <dt><%= pluralize(sale.errors.count, "error") %> prohibited this sale from being saved:</dt>
+            <dd>
+              <ul>
+              <% sale.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+              </ul>
+            </dd>
+          </dl>
         </div>
       <% end %>
       
+      <section>
+        <div class="column twelve">
+          <div class="row" style="padding: 0px 10px;">
+            <h3>Sale Settings</h3>
+            <p>Set a name for your sale to identify it and select whether the sale is based on percentage or a fixed amount off. You can also schedule a sale for a specific time period.</p>
+          </div>
+          <div class="row">
+            <div class="card">
+              <div class="column one-half">
+                <p><b>Sale title</b></p>
+                <%= form.text_field :title %>
+                <br>
+                <p><b>Sale type</b></p>
+                <div class="row side-elements">
+                  <label><%= form.radio_button :sale_type, "Percentage", onClick: "document.getElementById('amount_suffix').innerHTML = '%'"%> Percentage</label>
+                  <label><%= form.radio_button :sale_type, "Fixed Amount Off", onClick: "document.getElementById('amount_suffix').innerHTML = '#{@currency}';" %> Fixed Amount Off</label>
+                </div>
+                <p><b>Amount</b></p>
+                <div class="input-group">
+                  <%= form.number_field :amount %>
+                  <span class="append" id="amount_suffix">%</span>
+                </div>
+              </div>
+              <div class="column one-half">
+                <p>Schedule your sale?</p>
+                <div class="row side-elements">
+                  <label><%= form.radio_button :status, "Disabled", onClick: "document.getElementById('schedule').style.display='none';" %> No</label>
+                  <label><%= form.radio_button :status, "Scheduled", onClick: "document.getElementById('schedule').style.display='block';" %> Yes</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="schedule" style="display: none;">
+        <aside>
+          <h3>Sale Schedule</h3>
+          <p>Enable or disable the scheduler. This will start and end the sale at given time.</p>
+        </aside>
+        <article>
+          <div class="alert notice">
+            <dl>
+              <dt>Notice Alert</dt>
+              <dd>Timezone is UTC.</dd>
+            </dl>
+          </div>
+          <div class="card">
+            <h5>Schedule</h5>
+            <div class="row side-elements">
+              <%= form.label :start_time %>
+              <%= form.datetime_select :start_time, min: DateTime.now %>
+            </div>
+            <div class="row side-elements">
+              <%= form.label :end_time %>
+              <%= form.datetime_select :end_time, min: DateTime.now %>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section>
+        <div class="column twelve">
+          <div class="row" style="padding: 0px 10px;">
+            <h3>Sale Target</h3>
+            <p>Choose the target of your sale. You can either place the sale on whole store or specific targets.</p>
+          </div>
+          <div class="row full-width">
+            <div class="card colums twelve">
+              <p><b>Sale Target</b></p>
+              <div class="row side-elements">
+                <label><%= form.radio_button :sale_target, 'Whole Store', onClick: 'document.getElementById("submit").value = ' + (sale.id.nil? ? '"Create sale"' : '"Update sale"') %> Whole Store</label>
+                <label><%= form.radio_button :sale_target, 'Specific collections', onClick: 'document.getElementById("submit").value = "Choose Collections";' %> Specific collections</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!--
       <section>
         <aside>
           <h2>Sale Status</h2>
@@ -95,9 +179,9 @@
           </div>
         </article>
       </section>
-
+      -->
       <div class="actions">
-        <%= form.submit :onclick => "loading();"%>
+        <%= form.submit nil, id: 'submit'%>
       </div>
     <% end %>
   </article>
@@ -105,11 +189,14 @@
 
 <script type="text/javascript">
   (function() {
-   if (document.getElementById("sale_status_scheduled").checked){
-      document.getElementById('schedule').style.display='block'
+    if (document.getElementById("sale_status_scheduled").checked){
+      document.getElementById('schedule').style.display='block';
+    }
+    if (document.getElementById('sale_sale_type_fixed_amount_off').checked){
+      document.getElementById('amount_suffix').innerHTML = '<%= @currency %>';
+    }
+    if (document.getElementById('sale_sale_target_specific_collections').checked){
+      document.getElementById("submit").value = 'Choose Collections';
     }
   })();
-  function loading(){
-    setTimeout(function(){ document.getElementById("main_app").innerHTML= "<br/><br/><section><article><div class='card'><h4>Processing request. If you activated or deactivated a sale this might take some time while your sale is being processed on your shop.</h4></div></article></section>"; }, 3000);
-  }
 </script>

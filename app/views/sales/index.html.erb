@@ -7,39 +7,45 @@
 <section>
   <article>
     <div class="card">
-      <article>
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Target</th>
-            <th>Amount</th>
-            <th>Type</th>
-            <th>Start time</th>
-            <th>End time</th>
-            <th>Status</th>
-            <th colspan="3"></th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <% @sales.each do |sale| %>
-            <tr>
-              <td><%= sale.title %></td>
-              <td><%= sale.sale_target %></td>
-              <td><%= sale.amount %></td>
-              <td><%= sale.sale_type %></td>
-              <td><%= sale.start_time ? sale.start_time : "-" %></td>
-              <td><%= sale.end_time ? sale.end_time : "-"  %></td>
-              <td><span class="tag <%= ['green', 'yellow', 'blue'][Sale.statuses[sale.status]] %>"><%= sale.status %></span></td>
-              <td><%= link_to sale do %><i class="icon-preview"></i><% end %></td>
-              <td><%= link_to edit_sale_path(sale) do %><i class="icon-edit"></i><% end %></td>
-              <td><%= link_to sale, method: :delete, data: { confirm: 'Are you sure?' } do %><i class="icon-trash"></i><% end %></td>
+      <div class="row">
+        <h2 class="align-left" style="margin-bottom: 0px;">Sales</h2>
+      </div>
+      <div class="row">
+        <table>
+          <thead>
+            <tr style="background-color: #014A81; color: white;">
+              <th>Title</th>
+              <th>Target</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Start time</th>
+              <th>End time</th>
+              <th>Status</th>
+              <th colspan="3"></th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-      </article>
+          </thead>
+
+          <tbody>
+            <% @sales.each do |sale| %>
+              <tr>
+                <td><%= sale.title %></td>
+                <td><%= sale.sale_target %></td>
+                <td><%= sale.amount.to_s + " " + (sale.Percentage? ? "%" : @shop.currency) %></td>
+                <td><%= sale.sale_type %></td>
+                <td><%= sale.start_time ? sale.start_time : "-" %></td>
+                <td><%= sale.end_time ? sale.end_time : "-"  %></td>
+                <td><span class="tag <%= ['green', 'orange', 'blue', 'grey pending'][Sale.statuses[sale.status]] %>"><%= sale.status %></span></td>
+                <td><%= link_to sale do %><i class="icon-preview"></i><% end %></td>
+                <td><% if sale.Disabled? %>
+                      <%= link_to edit_sale_path(sale) do %><i class="icon-edit"></i><% end %>
+                    <% end %>
+                </td>
+                <td><%= link_to sale, method: :delete, data: { confirm: 'Are you sure?' } do %><i class="icon-trash"></i><% end %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </article>
   <br>
