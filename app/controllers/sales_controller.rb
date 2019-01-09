@@ -31,16 +31,18 @@ class SalesController < ShopifyApp::AuthenticatedController
   # POST /sales.json
   def create
     @sale = Sale.new(sale_params)
-    @sale.shop_id = Shop.find_by(shopify_domain: ShopifyAPI::Shop.current.myshopify_domain).id
-    if !@sale.Scheduled?
+    @sale.shop_id = Shop.find_by(shopify_domain: session[:shopify_domain]).id
+    if !@sale.scheduled
       @sale.start_time = nil
       @sale.end_time = nil
     end
     respond_to do |format|
       if @sale.save
-        if @sale.Scheduled?
+        if @sale.scheduled
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
+        elsif @sale.Enabled?
+          ActivateSaleJob.perform_later(@sale.id)
         end
         if @sale.sale_target == 'Specific collections'
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
@@ -56,30 +58,39 @@ class SalesController < ShopifyApp::AuthenticatedController
   # PATCH/PUT /sales/1
   # PATCH/PUT /sales/1.json
   def update
-    if @sale.Enabled? || (@sale.Scheduled? && @sale.start_time < DateTime.now && DateTime.now < @sale.end_time)
-      check = true
+    if @sale.Enabled?
+      check2 = true
+      if (@sale.scheduled && @sale.start_time < DateTime.now && DateTime.now < @sale.end_time)
+        check = true
+      end
     else 
       check = false
+      check2 = false
     end
     respond_to do |format|
       if @sale.update(sale_params)
-        if !@sale.Scheduled?
+        if !@sale.scheduled
           @sale.start_time = nil
           @sale.end_time = nil
         end
         @sale.save
         if @sale.Enabled?
-          ActivateSaleJob.perform_later(@sale.id)
-        elsif @sale.Scheduled?
-          ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
-          DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
-        elsif @sale.Disabled? && check
+          if @sale.scheduled
+            ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
+            DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
+          else
+            ActivateSaleJob.perform_later(@sale.id)
+          end
+        elsif @sale.Disabled?
           DeactivateSaleJob.perform_later(@sale.id)        
         end
-        if @sale.sale_target == 'Specific collections'
+        if !@sale.Disabled? && check2
+          check2 = false
+        end
+        if @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
         else
-          format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
+          format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
         end
       else
         format.html { render :edit }

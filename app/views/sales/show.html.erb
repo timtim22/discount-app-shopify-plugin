@@ -1,70 +1,93 @@
 <br/>
-<% if @sale.Disabled? %>
-  <%= link_to 'Update sale', edit_sale_path(@sale) %> |
-<% end %>
-<%= link_to 'All sales', sales_path %>
+<%= link_to 'All sales', sales_path, class: "button" %>
+<br/>
+<br/>
 <br/>
 <section>
   <article>
-    <div class="card">
-      <p>
-        <strong>Status:</strong>
-        <%= @sale.status %>
-      </p>
-
-      <p>
-        <strong>Title:</strong>
-        <%= @sale.title %>
-      </p>
-
-      <p>
-        <strong>Amount:</strong>
-        <%= @sale.amount %>
-      </p>
-
-      <p>
-        <strong>Type:</strong>
-        <%= @sale.sale_type %>
-      </p>
-
-      <% if @sale.Scheduled? %>
+    <div class="card has-sections column one-half">
+      <div class="card-section" style="padding-bottom: 0px;">
+        <p><b>Overview</b></p>
+      </div><hr/>
+      <div class="card-section">
         <p>
-          <strong>Start time:</strong>
-          <%= @sale.start_time %>
+          <strong>Status:</strong>
+          <%= @sale.status %>
         </p>
 
         <p>
-          <strong>End time:</strong>
-          <%= @sale.end_time %>
+          <strong>Title:</strong>
+          <%= @sale.title %>
         </p>
-      <% end %>
 
-      <p>
-        <strong>Target:</strong>
-        <%= @sale.sale_target %>
-      </p>
+        <p>
+          <strong>Amount:</strong>
+          <%= @sale.amount %>
+        </p>
 
-      <% if @sale.sale_target == "Specific collections" %>
-        <% if !@sale_collections.empty? %>
-          <table>
-            <thead>
-              <tr>
-                <th>Collections</th>
-              </tr>
-            </thead>
+        <p>
+          <strong>Type:</strong>
+          <%= @sale.sale_type %>
+        </p>
 
-            <tbody>
-              <% @sale_collections.each do |sale_collection| %>
-                <tr>
-                  <td><%= sale_collection.collection_title %></td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+        <p>
+          <strong>Target:</strong>
+          <%= @sale.sale_target %>
+        </p>
 
+        <% if @sale.scheduled %>
+          <p>
+            <strong>Start time:</strong>
+            <%= @sale.start_time %>
+          </p>
+
+          <p>
+            <strong>End time:</strong>
+            <%= @sale.end_time %>
+          </p>
         <% end %>
-      <% end %>
 
+        <% if @sale.sale_target == "Specific collections" %>
+          <% if !@sale_collections.empty? %>
+            <table>
+              <thead>
+                <tr>
+                  <th>Collections</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <% @sale_collections.each do |sale_collection| %>
+                  <tr>
+                    <td><%= sale_collection.collection_title %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+
+          <% end %>
+        <% end %>
+        <% if @sale.Disabled? %>
+          <%= link_to 'Edit', edit_sale_path(@sale), class: "button" %>
+        <% else %>
+          <em>Deactivate your sale to edit it.</em>
+        <% end %>
+      </div>
+    </div>
+    <div class="column one-half">
+      <h3>Sale Status</h3>
+      <p>You can activate or deactivate your sale from here.</p>
+      <div class="card">
+        
+        <%= form_with(model: @sale, local: true) do |form| %>
+          <label><%= form.radio_button :status, "Enabled" %> Activate now</label>
+          <label><%= form.radio_button :status, "Disabled" %> Deactivate now</label>
+          <br/>
+          <div class="actions">
+            <%= form.submit "Save sale", id: 'submit'%>
+          </div>
+        <% end %>
+      </div>
     </div>
   </article>
 </section>

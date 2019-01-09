@@ -4,7 +4,7 @@ class Sale < ApplicationRecord
 
 	enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
 	enum sale_type: [ 'Percentage', 'Fixed Amount Off' ]
-	enum status: ['Enabled', 'Disabled', 'Scheduled', 'Processing']
+	enum status: ['Enabled', 'Disabled', 'Processing']
 	validates :title, presence: true
 	validates :amount, presence: true
 

@@ -59,6 +59,7 @@ ActiveRecord::Schema.define(version: 2019_01_01_042335) do
     t.datetime "start_time"
     t.datetime "end_time"
     t.integer "status", default: 1
+    t.boolean "scheduled", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["shop_id"], name: "index_sales_on_shop_id"
