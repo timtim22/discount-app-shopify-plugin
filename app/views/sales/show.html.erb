@@ -80,8 +80,8 @@
       <div class="card">
         <% if !@sale.Activating? && !@sale.Deactivating? %>
           <%= form_with(model: @sale, local: true) do |form| %>
-            <label><%= form.radio_button :status, "Enabled" %> Activate now</label>
-            <label><%= form.radio_button :status, "Disabled" %> Deactivate now</label>
+            <label><%= form.radio_button :status, "Enabled" %> Active</label>
+            <label><%= form.radio_button :status, "Disabled" %> Inactive</label>
             <br/>
             <div class="actions">
               <%= form.submit "Save sale", id: 'submit'%>

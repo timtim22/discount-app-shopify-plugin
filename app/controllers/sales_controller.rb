@@ -91,7 +91,9 @@ class SalesController < ShopifyApp::AuthenticatedController
         if !@sale.Disabled? && check2
           check2 = false
         end
-        if @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2 && !@sale.Activating? && !@sale.Deactivating?
+        if @sale.sale_target == 'Whole Store'
+          format.html { redirect_to sales_path }
+        elsif @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2 && !@sale.Activating? && !@sale.Deactivating?
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
         else
           format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
