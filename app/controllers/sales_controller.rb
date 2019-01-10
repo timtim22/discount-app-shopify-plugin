@@ -62,7 +62,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     if @sale.Enabled?
       check2 = true
       check = true
-      if !(@sale.scheduled && @sale.start_time < DateTime.now && DateTime.now < @sale.end_time)
+      if @sale.scheduled && @sale.start_time > DateTime.now && DateTime.now > @sale.end_time
         check = false
       end
     else 
@@ -91,7 +91,7 @@ class SalesController < ShopifyApp::AuthenticatedController
         if !@sale.Disabled? && check2
           check2 = false
         end
-        if @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2
+        if @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2 && !@sale.Activating?
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
         else
           format.html { redirect_to @sale, notice: 'Sale was successfully updated.' }
@@ -121,8 +121,14 @@ class SalesController < ShopifyApp::AuthenticatedController
     if params[:commit] == "Activate"
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Disabled?
-          ActivateSaleJob.perform_later(sale.id)
-          sale.update(status: 2)
+          if sale.scheduled
+            ActivateSaleJob.set(wait_until: sale.start_time).perform_later(sale.id)
+            DeactivateSaleJob.set(wait_until: sale.end_time).perform_later(sale.id)
+            sale.update(status: 0)
+          else
+            ActivateSaleJob.perform_later(sale.id)
+            sale.update(status: 2)
+          end
         elsif sale.Activating? || sale.Deactivating?
           redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
           return
