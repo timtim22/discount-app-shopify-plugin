@@ -113,6 +113,10 @@ class SalesController < ShopifyApp::AuthenticatedController
   end
 
   def medit
+    if params[:sale_ids].nil?
+      redirect_to sales_path, notice: 'Please select at least one sale to apply that action to.'
+      return
+    end
     if params[:commit] == "Activate"
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Disabled?
