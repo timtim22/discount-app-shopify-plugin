@@ -2,7 +2,17 @@
 
 <%= render 'form', sale: @sale %>
 <br>
-<%= link_to 'Show sale', @sale, class: 'button' %> |
+<%= link_to 'Show sale', @sale, class: 'button' %>
 <%= link_to 'Dashboard', sales_path, class: 'button' %>
 <br>
 <br>
+<script type="text/javascript">
+  (function() {
+    if (document.getElementById('sale_sale_target_specific_collections').checked){
+      document.getElementById("sale_title").innerHTML="Editing sale for specific collections";
+    }
+    if (document.getElementById('sale_sale_target_whole_store').checked){
+      document.getElementById("sale_title").innerHTML="Editing sale for whole store";
+    }
+  })();
+</script>
