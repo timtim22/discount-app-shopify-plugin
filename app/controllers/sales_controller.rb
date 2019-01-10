@@ -45,7 +45,9 @@ class SalesController < ShopifyApp::AuthenticatedController
           ActivateSaleJob.perform_later(@sale.id)
           @sale.update(status: 2)
         end
-        if @sale.sale_target == 'Specific collections'
+        if @sale.sale_target == 'Whole Store'
+          format.html { redirect_to sales_path }
+        elsif @sale.sale_target == 'Specific collections'
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
         else
           format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
