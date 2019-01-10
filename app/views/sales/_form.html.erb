@@ -197,7 +197,7 @@
     </section>
     -->
     <div class="actions">
-      <%= form.submit nil, id: 'submit'%>
+      <%= form.submit "Save sale", id: 'submit'%>
     </div>
   <% end %>
 </article>
@@ -211,9 +211,11 @@
     if (document.getElementById('sale_sale_target_specific_collections').checked){
       document.getElementById("submit").value = 'Choose Collections';
       document.getElementById("whole_store").style.display='none';
+      document.getElementById("sale_title").innerHTML="Create a sale for specific collections";
     }
     if (document.getElementById('sale_sale_target_whole_store').checked){
       document.getElementById("whole_store").style.display = 'block';
+      document.getElementById("sale_title").innerHTML="Create a sale for whole store";
     }
     if (document.getElementById("sale_scheduled_true").checked){
       document.getElementById('schedule').style.display='block';

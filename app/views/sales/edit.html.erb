@@ -1,6 +1,8 @@
-<h1>Editing Sale</h1>
+<h1 id="sale_title">Editing Sale</h1>
 
 <%= render 'form', sale: @sale %>
-
-<%= link_to 'Show sale', @sale %> |
-<%= link_to 'All sales', sales_path %>
+<br>
+<%= link_to 'Show sale', @sale, class: 'button' %> |
+<%= link_to 'Dashboard', sales_path, class: 'button' %>
+<br>
+<br>

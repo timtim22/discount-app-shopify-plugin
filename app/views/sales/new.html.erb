@@ -1,18 +1,20 @@
-<h1>New Sale</h1>
+<h1 id="sale_title">New Sale</h1>
 
 <section id="sale_selector">
 	<div class='card' style="text-align: center;">
 		<h1 style="color: #014A81;">Create a sale for</h1>
 		<button onclick='document.getElementById("newForm").style.display = "block"; 
 										 document.getElementById("sale_selector").style.display = "none";
-										 document.getElementById("sale_sale_target_whole_store").checked = true;'>
+										 document.getElementById("sale_sale_target_whole_store").checked = true;
+										 document.getElementById("sale_title").innerHTML="Create a sale for whole store";'>
 			Whole Store
 		</button>
 		<button onclick='document.getElementById("newForm").style.display = "block"; 
 										 document.getElementById("sale_selector").style.display = "none";
 										 document.getElementById("sale_sale_target_specific_collections").checked = true;
 										 document.getElementById("submit").value = "Choose Collections";
-										 document.getElementById("whole_store").style.display = "none";'>
+										 document.getElementById("whole_store").style.display = "none";
+										 document.getElementById("sale_title").innerHTML="Create a sale for specific collections";'>
 			Specific Collections
 		</button>
 	</div>
@@ -21,9 +23,10 @@
 <section id="newForm" style="display: none;">
 	<%= render 'form', sale: @sale %>
 </section>
-
-<%= link_to 'All sales', sales_path %>
-
+<br>
+<%= link_to 'Dashboard', sales_path, class: 'button' %>
+<br>
+<br>
 <script type="text/javascript">
 	(function() {
 		document.getElementById("newForm").style.display = 'none';
