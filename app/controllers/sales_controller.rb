@@ -43,6 +43,7 @@ class SalesController < ShopifyApp::AuthenticatedController
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
         elsif @sale.Enabled?
           ActivateSaleJob.perform_later(@sale.id)
+          @sale.update(status: 2)
         end
         if @sale.sale_target == 'Specific collections'
           format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
@@ -80,9 +81,11 @@ class SalesController < ShopifyApp::AuthenticatedController
             DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
           else
             ActivateSaleJob.perform_later(@sale.id)
+            @sale.update(status: 2)
           end
-        elsif @sale.Disabled?
-          DeactivateSaleJob.perform_later(@sale.id)        
+        elsif @sale.Disabled? && check
+          DeactivateSaleJob.perform_later(@sale.id)
+          @sale.update(status: 3)
         end
         if !@sale.Disabled? && check2
           check2 = false
@@ -107,6 +110,43 @@ class SalesController < ShopifyApp::AuthenticatedController
       format.html { redirect_to sales_url, notice: 'Sale was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  def medit
+    if params[:commit] == "Activate"
+      Sale.find(params[:sale_ids]).each do |sale|
+        if sale.Disabled?
+          ActivateSaleJob.perform_later(sale.id)
+          sale.update(status: 2)
+        elsif sale.Activating? || sale.Deactivating?
+          redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
+          return
+        end
+      end
+    elsif params[:commit] == "Deactivate"
+      Sale.find(params[:sale_ids]).each do |sale|
+        if sale.Enabled?
+          DeactivateSaleJob.perform_later(sale.id)
+          sale.update(status: 3)
+        elsif sale.Activating? || sale.Deactivating?
+          redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
+          return
+        end
+      end
+    elsif params[:commit] == "Delete"
+      Sale.find(params[:sale_ids]).each do |sale|
+        if sale.Disabled?
+          sale.destroy
+        elsif sale.Activating? || sale.Deactivating?
+          redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
+          return
+        else
+          redirect_to sales_path, notice: 'Can not delete an active sale.'
+          return
+        end
+      end
+    end
+    redirect_to sales_path
   end
 
   private

@@ -4,7 +4,7 @@ class Sale < ApplicationRecord
 
 	enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
 	enum sale_type: [ 'Percentage', 'Fixed Amount Off' ]
-	enum status: ['Enabled', 'Disabled', 'Processing']
+	enum status: ['Enabled', 'Disabled', 'Activating', 'Deactivating']
 	validates :title, presence: true
 	validates :amount, presence: true
 
@@ -110,7 +110,7 @@ class Sale < ApplicationRecord
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_maxed?
+					if ShopifyAPI.credit_left < 5
 						sleep 10.seconds
 						puts "Sleeping"
 					end
@@ -143,7 +143,7 @@ class Sale < ApplicationRecord
 				page = 1
 				while !products.empty?
 					products.each do |product|
-						if ShopifyAPI.credit_maxed?
+						if ShopifyAPI.credit_left < 5
 							sleep 10.seconds
 							puts "Sleeping"
 						end

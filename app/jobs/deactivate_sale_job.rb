@@ -7,8 +7,12 @@ class DeactivateSaleJob < ApplicationJob
     if sale.Disabled? && sale.scheduled && OldPrice.find_by(sale_id: sale.id).nil?
 	  	return
 	  end
+    if !sale.Deactivating?
+      sale.update(status: 3)
+    end
 	  session = sale.shop.with_shopify!
 	  sale.deactivate_sale
-	  return
+	  sale.update(status: 1)
+    return
   end
 end
