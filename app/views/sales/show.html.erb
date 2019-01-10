@@ -78,7 +78,7 @@
       <h3>Sale Status</h3>
       <p>You can activate or deactivate your sale from here.</p>
       <div class="card">
-        <% if !@sale.Activating? || !@sale.Deactivating? %>
+        <% if !@sale.Activating? && !@sale.Deactivating? %>
           <%= form_with(model: @sale, local: true) do |form| %>
             <label><%= form.radio_button :status, "Enabled" %> Activate now</label>
             <label><%= form.radio_button :status, "Disabled" %> Deactivate now</label>

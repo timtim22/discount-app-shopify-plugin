@@ -61,8 +61,9 @@ class SalesController < ShopifyApp::AuthenticatedController
   def update
     if @sale.Enabled?
       check2 = true
-      if (@sale.scheduled && @sale.start_time < DateTime.now && DateTime.now < @sale.end_time)
-        check = true
+      check = true
+      if !(@sale.scheduled && @sale.start_time < DateTime.now && DateTime.now < @sale.end_time)
+        check = false
       end
     else 
       check = false
