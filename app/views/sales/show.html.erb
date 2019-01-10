@@ -86,7 +86,8 @@
             <div class="actions">
               <%= form.submit "Save sale", id: 'submit'%>
             </div>
-            <em>Once you activate or deactivate a sale you have to wait until it is finished processing before you can change its status again.</em>
+            <br>
+            <em><i>Once you activate or deactivate a sale you have to wait until it is finished processing before you can change its status again.</i></em>
           <% end %>
         <% else %>
           <p>The sale is currently <%= @sale.status %>. Please wait for it to finish.</p>
