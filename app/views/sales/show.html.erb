@@ -83,6 +83,7 @@
             <label><%= form.radio_button :status, "Enabled" %> Active</label>
             <label><%= form.radio_button :status, "Disabled" %> Inactive</label>
             <br/>
+            <%= form.hidden_field :show_page, value: true %>
             <div class="actions">
               <%= form.submit "Save sale", id: 'submit'%>
             </div>
