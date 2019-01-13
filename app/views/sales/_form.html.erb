@@ -66,13 +66,39 @@
           <h5>Schedule</h5>
           <div class="row side-elements">
             <%= form.label :start_time %>
-            <%= form.datetime_select :start_time, min: DateTime.now %>
+            <div class='input-group date' id='datetimepicker1'>
+              <%= form.text_field :start_time %>
+              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
+                  <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
           </div>
           <div class="row side-elements">
             <%= form.label :end_time %>
-            <%= form.datetime_select :end_time, min: DateTime.now %>
+            <div class='input-group date' id='datetimepicker2' style="margin-left: 4.67px">
+              <%= form.text_field :end_time %>
+              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
+                  <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
           </div>
         </div>
+        <script type="text/javascript">
+          $(function () {
+            $('#datetimepicker1').datetimepicker({
+              minDate: "<%= DateTime.now.utc.strftime('%m/%d/%Y %I:%M %p')%>"
+            });
+            $('#datetimepicker2').datetimepicker({
+              useCurrent: false //Important! See issue #1075
+            });
+            $("#datetimepicker1").on("dp.change", function (e) {
+              $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+            });
+            $("#datetimepicker2").on("dp.change", function (e) {
+              $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+            });
+          });
+        </script>
       </article>
     </section>
 
