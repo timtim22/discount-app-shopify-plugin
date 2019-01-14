@@ -10,11 +10,47 @@ class Sale < ApplicationRecord
 
 	def activate_sale
 		if sale_target == 'Whole Store'
+			products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants"})
+			page = 1
+			while !products.empty?
+				products.each do |product|
+					if ShopifyAPI.credit_left < 5
+						sleep 10.seconds
+					end
+					old_price = OldPrice.find_by(sale_id: id, product_id: product.id.to_s)
+					if old_price.nil?
+						variants = {}
+						product.variants.each do |variant|
+							if variant.price.to_f > 0
+								if variant.compare_at_price.nil?
+									variant.compare_at_price = variant.price
+								end
+								variants[variant.id.to_s] = variant.price
+								if Percentage?
+				  				variant.price = ((100-amount)*variant.price.to_f)/100
+				  			else
+				  				variant.price = variant.price.to_f - amount
+				  			end
+							end
+						end
+						old_price = OldPrice.new(sale_id: id, product_id: product.id.to_s, variants: variants)
+						product.save
+						old_price.save
+					end
+				end
+				if products.length == 250
+					page += 1
+					products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants" page: page})
+				else
+					products = []
+				end
+			end
+=begin
 			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
 			while !variants.empty?
 				variants.each do |variant|
-					if ShopifyAPI.credit_maxed?
+					if ShopifyAPI.credit_left < 5
 						sleep 10.seconds
 						puts "Sleeping"
 					end
@@ -48,7 +84,8 @@ class Sale < ApplicationRecord
 					variants = []
 				end
 			end
-
+=end
+			
 		elsif sale_target == 'Specific collections'
 			collections = SaleCollection.where(sale_id: id).pluck(:collection_id)
 			if collections.empty?
@@ -59,7 +96,7 @@ class Sale < ApplicationRecord
 				page = 1
 				while !products.empty?
 					products.each do |product|
-						if ShopifyAPI.credit_maxed?
+						if ShopifyAPI.credit_left < 5
 							sleep 10.seconds
 							puts "Sleeping"
 						end
