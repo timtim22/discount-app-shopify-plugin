@@ -33,9 +33,11 @@ class Sale < ApplicationRecord
 				  			end
 							end
 						end
-						old_price = OldPrice.new(sale_id: id, product_id: product.id.to_s, variants: variants)
-						product.save
-						old_price.save
+						if !variants.empty?
+							old_price = OldPrice.new(sale_id: id, product_id: product.id.to_s, variants: variants)
+							product.save
+							old_price.save
+						end
 					end
 				end
 				if products.length == 250
@@ -143,6 +145,23 @@ class Sale < ApplicationRecord
 
 	def deactivate_sale
 		if sale_target == 'Whole Store'
+			OldPrice.where(sale_id: id).find_each do |old_price|
+				if ShopifyAPI.credit_left < 5
+					sleep 10.seconds
+					puts "Sleeping"
+				end
+				product = ShopifyAPI::Product.new
+				product.id = old_price.product_id.to_i
+				product.variants = []
+				old_price.variants.each do |k,v|
+					variant = ShopifyAPI::Variant.new
+					variant.id = k
+					variant.price = v
+					product.variants.push(variant)
+				end
+				product.save
+			end
+=begin
 			variants = ShopifyAPI::Variant.find(:all, params: {limit: "250", fields: "id,price,compare_at_price"})
 			page = 1
 			while !variants.empty?
@@ -169,7 +188,7 @@ class Sale < ApplicationRecord
 					variants = []
 				end
 			end
-
+=end
 		elsif sale_target == 'Specific collections'
 			collections = SaleCollection.where(sale_id: id).pluck(:collection_id)
 			if collections.empty?
