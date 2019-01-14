@@ -10,10 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_12_19_071720) do
+ActiveRecord::Schema.define(version: 2019_01_01_042335) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "delayed_jobs", force: :cascade do |t|
+    t.integer "priority", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "handler", null: false
+    t.text "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string "locked_by"
+    t.string "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
+  end
+
+  create_table "old_prices", force: :cascade do |t|
+    t.bigint "sale_id"
+    t.string "product_id"
+    t.json "variants"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "sale_id"], name: "index_old_prices_on_product_id_and_sale_id", unique: true
+    t.index ["product_id"], name: "index_old_prices_on_product_id"
+    t.index ["sale_id"], name: "index_old_prices_on_sale_id"
+  end
 
   create_table "sale_collections", force: :cascade do |t|
     t.bigint "sale_id"
@@ -47,5 +73,6 @@ ActiveRecord::Schema.define(version: 2018_12_19_071720) do
     t.index ["shopify_domain"], name: "index_shops_on_shopify_domain", unique: true
   end
 
+  add_foreign_key "old_prices", "sales"
   add_foreign_key "sale_collections", "sales"
 end

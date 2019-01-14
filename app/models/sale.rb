@@ -40,7 +40,7 @@ class Sale < ApplicationRecord
 				end
 				if products.length == 250
 					page += 1
-					products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants" page: page})
+					products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants", page: page})
 				else
 					products = []
 				end
