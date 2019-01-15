@@ -9,7 +9,7 @@ class Sale < ApplicationRecord
 	validates :amount, presence: true
 
 	def activate_sale
-		sale_id = this.id
+		sale_id = self.id
 		if sale_target == 'Whole Store'
 			products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants"})
 			page = 1
@@ -99,7 +99,7 @@ class Sale < ApplicationRecord
 	end
 
 	def deactivate_sale
-		sale_id = this.id
+		sale_id = self.id
 		OldPrice.where(sale_id: sale_id).find_each do |old_price|
 			if ShopifyAPI.credit_left < 5
 				sleep 10.seconds
