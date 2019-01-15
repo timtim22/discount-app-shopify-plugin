@@ -1,13 +1,12 @@
 <br/>
-<aside>
-  <%= link_to 'New Sale on whole store', new_sale_path(whole_store: true), class: 'button' %>
-  <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button' %>
-</aside>
-<br/>
 
 <section>
   <article>
     <div class="card">
+      <div class="row">
+        <%= link_to 'New Sale on whole store', new_sale_path(whole_store: true), class: 'button', style: 'padding: 10px 20px; font-weight: bold;' %>
+        <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button', style: 'padding: 10px 20px; font-weight: bold;' %>
+      </div>
       <div class="row">
         <h2 class="align-left" style="margin-bottom: 0px;">Discountify Dashboard</h2>
       </div>
