@@ -10,8 +10,6 @@
 <% if params[:whole_store] %>
 	<script type="text/javascript">
 		(function() {
-		  document.getElementById("newForm").style.display = "block"; 
-			document.getElementById("sale_selector").style.display = "none";
 			document.getElementById("sale_sale_target_whole_store").checked = true;
 			document.getElementById("sale_title").innerHTML="Create a sale for whole store";
   	})();
@@ -19,8 +17,6 @@
 <% else %>
 	<script type="text/javascript">
 		(function() {
-		  document.getElementById("newForm").style.display = "block"; 
-			document.getElementById("sale_selector").style.display = "none";
 			document.getElementById("sale_sale_target_specific_collections").checked = true;
 			document.getElementById("submit").value = "Choose Collections";
 			document.getElementById("whole_store").style.display = "none";
