@@ -36,8 +36,8 @@ class SalesController < ShopifyApp::AuthenticatedController
       @sale.start_time = nil
       @sale.end_time = nil
     else
-      @sale.start_time = DateTime.strptime(params[:sale][:start_time], '%m/%d/%Y %I:%M %p')
-      @sale.end_time = DateTime.strptime(params[:sale][:end_time], '%m/%d/%Y %I:%M %p')
+      @sale.start_time = DateTime.strptime(params[:sale][:start_date]+params[:sale][:start_time], '%m/%d/%Y%I:%M %p')
+      @sale.end_time = DateTime.strptime(params[:sale][:end_date]+params[:sale][:end_time], '%m/%d/%Y%I:%M %p')
     end
     respond_to do |format|
       if @sale.save

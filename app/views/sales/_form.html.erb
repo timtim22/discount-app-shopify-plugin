@@ -65,9 +65,27 @@
         <div class="card">
           <h5>Schedule</h5>
           <div class="row side-elements">
-            <%= form.label :start_time %>
+            <%= form.label :start_date %>
             <div class='input-group date' id='datetimepicker1'>
+              <%= form.text_field :start_date %>
+              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
+                  <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <div class="row side-elements">
+            <%= form.label :start_time %>
+            <div class='input-group date' id='datetimepicker3'>
               <%= form.text_field :start_time %>
+              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
+                  <span class="glyphicon glyphicon-time"></span>
+              </span>
+            </div>
+          </div>
+          <div class="row side-elements">
+            <%= form.label :end_date %>
+            <div class='input-group date' id='datetimepicker2' style="margin-left: 4.67px">
+              <%= form.text_field :end_date %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
                   <span class="glyphicon glyphicon-calendar"></span>
               </span>
@@ -75,10 +93,10 @@
           </div>
           <div class="row side-elements">
             <%= form.label :end_time %>
-            <div class='input-group date' id='datetimepicker2' style="margin-left: 4.67px">
+            <div class='input-group date' id='datetimepicker4' style="margin-left: 4.67px">
               <%= form.text_field :end_time %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
-                  <span class="glyphicon glyphicon-calendar"></span>
+                  <span class="glyphicon glyphicon-time"></span>
               </span>
             </div>
           </div>
@@ -86,9 +104,11 @@
         <script type="text/javascript">
           $(function () {
             $('#datetimepicker1').datetimepicker({
+              format: 'MM/DD/YYYY',
               minDate: "<%= DateTime.now.utc.strftime('%m/%d/%Y %I:%M %p')%>"
             });
             $('#datetimepicker2').datetimepicker({
+              format: 'MM/DD/YYYY',
               useCurrent: false //Important! See issue #1075
             });
             $("#datetimepicker1").on("dp.change", function (e) {
@@ -96,6 +116,20 @@
             });
             $("#datetimepicker2").on("dp.change", function (e) {
               $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+            });
+            $('#datetimepicker3').datetimepicker({
+              format: 'LT',
+              minDate: "<%= DateTime.now.utc.strftime('%m/%d/%Y %I:%M %p')%>"
+            });
+            $('#datetimepicker4').datetimepicker({
+              format: 'LT',
+              useCurrent: false //Important! See issue #1075
+            });
+            $("#datetimepicker3").on("dp.change", function (e) {
+              $('#datetimepicker4').data("DateTimePicker").minDate(e.date);
+            });
+            $("#datetimepicker4").on("dp.change", function (e) {
+              $('#datetimepicker3').data("DateTimePicker").maxDate(e.date);
             });
           });
         </script>
@@ -138,90 +172,6 @@
       </div>
     </section>
 
-    <!--
-    <section>
-      <aside>
-        <h2>Sale Status</h2>
-        <p>Enable or disable the sale on your shop. The sale will be activated when you save the changes. If you want to apply sale on specific collections or products, check Deactivate for now and Activate it after you have added the collections or products to your sale.</p>
-      </aside>
-      <article>
-        <div class="card">
-          <h5>Status</h5>
-          <label><%= form.radio_button :status, "Enabled", onClick: "document.getElementById('schedule').style.display='none';" %> Activate</label>
-          <label><%= form.radio_button :status, "Disabled", onClick: "document.getElementById('schedule').style.display='none';" %> Deactivate</label>
-          <label><%= form.radio_button :status, "Scheduled", onClick: "document.getElementById('schedule').style.display='block';" %> Schedule</label>
-        </div>
-      </article>
-    </section>
-
-    <section id="schedule" style="display: none;">
-      <aside>
-        <h2>Sale Schedule</h2>
-        <p>Enable or disable the scheduler. This will start and end the sale at given time. Only activated sales which are scheduled will start. Sales that are deactivated will not start on schedule.</p>
-      </aside>
-      <article>
-        <div class="alert notice">
-          <dl>
-            <dt>Notice Alert</dt>
-            <dd>Timezone is UTC.</dd>
-          </dl>
-        </div>
-        <div class="card">
-          <h5>Schedule</h5>
-          <div class="row side-elements">
-            <%= form.label :start_time %>
-            <%= form.datetime_select :start_time, min: DateTime.now %>
-          </div>
-          <div class="row side-elements">
-            <%= form.label :end_time %>
-            <%= form.datetime_select :end_time, min: DateTime.now %>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <section>
-      <aside>
-        <h2>Sale Settings</h2>
-        <p>Specify the settings of the sale. You can select wether the sale is a percentage discount or a fixed amount off.</p>
-      </aside>
-      <article>
-        <div class="card">
-          <h5>Settings</h5>
-          <p>Sale title</p>
-          <%= form.text_field :title %>
-          <br/>
-          <div class="row side-elements">
-            <label><%= form.radio_button :sale_type, "Percentage" %> Percentage</label>
-            <label><%= form.radio_button :sale_type, "Fixed Amount Off" %> Fixed Amount Off</label>
-          </div>
-          <div class="field">
-            <%= form.label :amount %>
-            <%= form.number_field :amount %>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <section>
-      <aside>
-        <h2>Sale target settings</h2>
-        <p>Select to apply to products in a collection or to whole store. You can also choose to manually select which products are in the sale.</p>
-      </aside>
-      <article>
-        <div class="card">
-          <h5>Behaviour</h5>
-          <p>Sale target</p>
-          <div class="row side-elements">
-            <label><%= form.radio_button :sale_target, 'Whole Store', :checked => true %> Whole Store</label>
-            <label><%= form.radio_button :sale_target, 'Specific collections' %> Specific collections</label>
-            <label><%= form.radio_button :sale_target, 'Specific products' %> Specific products</label>
-          </div>
-          <em>You can add collections or products once the sale is created.</em>
-        </div>
-      </article>
-    </section>
-    -->
     <div class="actions">
       <%= form.submit "Save sale", id: 'submit'%>
     </div>
