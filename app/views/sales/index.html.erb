@@ -1,6 +1,7 @@
 <br/>
 <aside>
-  <%= link_to 'New Sale', new_sale_path, class: 'button' %>
+  <%= link_to 'New Sale on whole store', new_sale_path(whole_store: true), class: 'button' %>
+  <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button' %>
 </aside>
 <br/>
 
