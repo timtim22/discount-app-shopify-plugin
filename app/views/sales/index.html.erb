@@ -4,13 +4,13 @@
   <article>
     <div class="card">
       <div class="row align-center">
-        <%= link_to 'New Sale on whole store', new_sale_path(whole_store: true), class: 'button', style: 'padding: 10px 20px; font-weight: bold;' %>
-        <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button', style: 'padding: 10px 20px; font-weight: bold;' %>
+        <%= link_to 'New Sale on whole store', new_sale_path(whole_store: true), class: 'button', style: 'padding: 10px 20px; font-weight: bold; margin-bottom: 1rem;' %>
+        <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button', style: 'padding: 10px 20px; font-weight: bold; margin-bottom: 1rem;' %>
       </div>
       <div class="row">
         <h2 class="align-left" style="margin-bottom: 0px;">Discountify Dashboard</h2>
       </div>
-      <div class="row" style="text-align: center;">
+      <div class="row" style="text-align: center; overflow-x:auto;">
         <% if !@sales.empty? %>
           <%= form_tag medit_sales_path, :method => :put do %>
             <table>
