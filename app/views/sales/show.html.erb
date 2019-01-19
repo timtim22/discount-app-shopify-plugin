@@ -88,7 +88,7 @@
               <%= form.submit "Save sale", id: 'submit'%>
             </div>
             <br>
-            <em><i>Once you activate or deactivate a sale you have to wait until it is finished processing before you can change its status again.</i></em>
+            <p><i>Activation or Deactivation processing duration may vary depending on the number of products on your store. Don't worry, the process will be continued in the background once you Activate/Deactivate a sale. You can close the app once the operation begins.</i></p>
           <% end %>
         <% else %>
           <p>The sale is currently <%= @sale.status %>. Please wait for it to finish.</p>
