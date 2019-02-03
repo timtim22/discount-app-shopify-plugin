@@ -114,7 +114,11 @@ class Sale < ApplicationRecord
 				variant.price = v
 				product.variants.push(variant)
 			end
-			product.save
+			begin
+				product.save
+			rescue ActiveResource::ResourceNotFound
+				puts "Product has been deleted."
+			end
 			old_price.destroy
 		end
 		return
