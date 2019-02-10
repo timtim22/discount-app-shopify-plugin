@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :tickets
   resources :sale_collections
   resources :sales do
   	collection do

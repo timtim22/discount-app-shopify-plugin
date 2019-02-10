@@ -27,3 +27,4 @@
 /config/master.key
 
 /custom_script.rb
+/config/local_env.yml

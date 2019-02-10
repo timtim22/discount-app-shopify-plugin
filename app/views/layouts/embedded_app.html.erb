@@ -37,5 +37,14 @@
         <%= yield :javascript %>
       </div>
     <% end %>
+    <hr>
+    <div class="container" style="text-align: center">
+      <p>Have an issue? Or even a question?</p>
+      <a onclick="document.getElementById('ticket').style.display='block'" class='button' >Submit a ticket</a>
+      <div id="ticket" style="display: none">
+        <%= render "tickets/form", ticket: Ticket.new %>
+      </div>
+    </div>
+    <br/><br/><br/>
   </body>
 </html>

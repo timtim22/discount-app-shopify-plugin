@@ -1,0 +1,34 @@
+<div style="text-align: left">
+  <%= form_with(model: ticket, remote: true) do |form| %>
+    <% if ticket.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(ticket.errors.count, "error") %> prohibited this ticket from being saved:</h2>
+
+        <ul>
+        <% ticket.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :name %>
+      <%= form.text_field :name %>
+    </div>
+
+    <div class="field">
+      <%= form.label :email %>
+      <%= form.email_field :email %>
+    </div>
+
+    <div class="field">
+      <%= form.label :query %>
+      <%= form.text_area :query %>
+    </div>
+    <br>
+    <div class="actions">
+      <%= form.submit %>
+    </div>
+  <% end %>
+</div>
