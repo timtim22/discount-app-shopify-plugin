@@ -25,6 +25,7 @@ class SalesController < ShopifyApp::AuthenticatedController
 
   # GET /sales/1/edit
   def edit
+    @sale_collections = SaleCollection.where(sale_id: @sale.id)
   end
 
   # POST /sales
@@ -41,6 +42,17 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
     respond_to do |format|
       if @sale.save
+        if @sale.sale_target == 'Specific collections'
+          collections = params[:sale][:collections]
+          list = collections.split("$;$")
+          list.each do |collection|
+            sc = SaleCollection.new
+            sc.collection_id, sc.collection_title = collection.split("$,$")
+            sc.sale_id = @sale.id
+            sc.save
+          end
+        end
+
         if @sale.scheduled
           ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
           DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
@@ -48,13 +60,8 @@ class SalesController < ShopifyApp::AuthenticatedController
           ActivateSaleJob.perform_later(@sale.id)
           @sale.update(status: 2)
         end
-        if @sale.sale_target == 'Whole Store'
-          format.html { redirect_to sales_path }
-        elsif @sale.sale_target == 'Specific collections'
-          format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
-        else
-          format.html { redirect_to @sale, notice: 'Sale was successfully created.' }
-        end
+
+        format.html { redirect_to sales_path, notice: 'Sale was successfully created.' }
       else
         format.html { render :new }
       end
@@ -70,12 +77,26 @@ class SalesController < ShopifyApp::AuthenticatedController
       if @sale.scheduled && @sale.start_time > DateTime.now && DateTime.now > @sale.end_time
         check = false
       end
-    else 
+    else
       check = false
       check2 = false
     end
     respond_to do |format|
       if @sale.update(sale_params)
+        if @sale.sale_target == 'Specific collections'
+          collections = params[:sale][:collections]
+          if !collections.empty?
+            SaleCollection.where(sale_id: @sale.id).destroy_all
+            list = collections.split("$;$")
+            list.each do |collection|
+              sc = SaleCollection.new
+              sc.collection_id, sc.collection_title = collection.split("$,$")
+              sc.sale_id = @sale.id
+              sc.save
+            end
+          end
+        end
+
         if !@sale.scheduled
           @sale.start_time = nil
           @sale.end_time = nil
@@ -99,11 +120,7 @@ class SalesController < ShopifyApp::AuthenticatedController
         if !@sale.Disabled? && check2
           check2 = false
         end
-        if @sale.sale_target == 'Whole Store' || params[:sale][:show_page]
-          format.html { redirect_to sales_path }
-        elsif @sale.sale_target == 'Specific collections' && !@sale.Enabled? && !check2 && !@sale.Activating? && !@sale.Deactivating?
-          format.html { redirect_to sale_collections_path(@sale.id), notice: 'Select collections for sale.'}
-        end
+        format.html { redirect_to sales_path }
       else
         format.html { render :edit }
         format.json { render json: @sale.errors, status: :unprocessable_entity }
