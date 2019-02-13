@@ -147,7 +147,7 @@
             <p><b>Sale Target</b></p>
             <div class="row side-elements">
               <label><%= form.radio_button :sale_target, 'Whole Store', onClick: 'document.getElementById("submit").value = ' + (sale.id.nil? ? '"Create sale"' : '"Update sale"') %> Whole Store</label>
-              <label><%= form.radio_button :sale_target, 'Specific collections', onClick: 'document.getElementById("submit").value = "Choose Collections";' %> Specific collections</label>
+              <label><%= form.radio_button :sale_target, 'Specific collections' %> Specific collections</label>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@
         <div class="row full-width">
           <div class="card colums twelve">
             <%= form.hidden_field :collections, value: "" %>
-            <button type="button" onclick="choose_categories()">Choose Categories</button>
+            <button type="button" onclick="choose_categories()">Choose Collections</button>
             <br>
             <div id="cate_target">
               <% if !@sale_collections.nil? && !@sale_collections.empty? %>
