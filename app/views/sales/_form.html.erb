@@ -146,7 +146,7 @@
           <div class="card colums twelve">
             <p><b>Sale Target</b></p>
             <div class="row side-elements">
-              <label><%= form.radio_button :sale_target, 'Whole Store', onClick: 'document.getElementById("submit").value = ' + (sale.id.nil? ? '"Create sale"' : '"Update sale"') %> Whole Store</label>
+              <label><%= form.radio_button :sale_target, 'Whole Store' %> Whole Store</label>
               <label><%= form.radio_button :sale_target, 'Specific collections' %> Specific collections</label>
             </div>
           </div>
@@ -171,7 +171,7 @@
                 <br>
                 <h3>Selected Collections:</h3>
                 <% @sale_collections.each_with_index do |collection, i| %>
-                  <%= (i+1).to_s %>) <%= collection.collection_title %>
+                  <%= (i+1).to_s %>) <%= collection.collection_title  %>
                   <br>
                 <% end %>
               <% end %>
@@ -202,7 +202,7 @@
     </section>
 
     <div class="actions" style="margin-left: 1rem;">
-      <%= form.submit "Save sale", id: 'submit'%>
+      <%= form.submit %>
     </div>
   <% end %>
 </article>
@@ -220,6 +220,8 @@
       document.getElementById('schedule').style.display='block';
     }
   })();
+
+  var collections = <%= raw @sale_collections.to_json %>
 
   function choose_categories(){
     var multipleCollectionOptions = {
@@ -254,6 +256,7 @@
           }
           txt = document.createTextNode(String(i+1)+") "+data.collections[i].title)
           target.appendChild(txt)
+          collections[data.collections[i].id] = data.collections[i].title
           hf.value += data.collections[i].id + "$,$" + data.collections[i].title+ "$;$"
         }
       }
