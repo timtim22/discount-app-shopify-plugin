@@ -10,6 +10,7 @@ class ActivateSaleJob < ApplicationJob
       end
 		  session = sale.shop.with_shopify!
 		  sale.activate_sale
+      puts "activated sale"
 		end
     sale.update(status: 0)
 	  return

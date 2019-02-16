@@ -5,7 +5,7 @@ class SalesController < ShopifyApp::AuthenticatedController
   # GET /sales.json
   def index
     @shop = ShopifyAPI::Shop.current
-    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: @shop.myshopify_domain).id)
+    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: @shop.myshopify_domain).id).order(:id)
   end
 
   # GET /sales/1
@@ -59,8 +59,8 @@ class SalesController < ShopifyApp::AuthenticatedController
           ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
           DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
         elsif @sale.Enabled?
-          ActivateSaleWorker.perform_async(@sale.id)
           @sale.update(status: 2)
+          ActivateSaleWorker.perform_async(@sale.id)
         end
 
         format.html { redirect_to sales_path, notice: 'Sale was successfully created.' }
@@ -114,12 +114,14 @@ class SalesController < ShopifyApp::AuthenticatedController
             ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
             DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
           else
-            ActivateSaleWorker.perform_async(@sale.id)
             @sale.update(status: 2)
+            ActivateSaleWorker.perform_async(@sale.id)
+
           end
         elsif @sale.Disabled? && check
-          DeactivateSaleWorker.perform_async(@sale.id)
           @sale.update(status: 3)
+          DeactivateSaleWorker.perform_async(@sale.id)
+
         end
         if !@sale.Disabled? && check2
           check2 = false
@@ -151,12 +153,14 @@ class SalesController < ShopifyApp::AuthenticatedController
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Disabled?
           if sale.scheduled
+            sale.update(status: 0)
             ActivateSaleWorker.perform_at(sale.start_time, sale.id)
             DeactivateSaleWorker.perform_at(sale.start_time, sale.id)
-            sale.update(status: 0)
+
           else
-            ActivateSaleWorker.perform_async(sale.id)
             sale.update(status: 2)
+            ActivateSaleWorker.perform_async(sale.id)
+
           end
         elsif sale.Activating? || sale.Deactivating?
           redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
@@ -166,8 +170,9 @@ class SalesController < ShopifyApp::AuthenticatedController
     elsif params[:commit] == "Deactivate"
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Enabled?
-          DeactivateSaleWorker.perform_async(sale.id)
           sale.update(status: 3)
+          DeactivateSaleWorker.perform_async(sale.id)
+
         elsif sale.Activating? || sale.Deactivating?
           redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
           return
