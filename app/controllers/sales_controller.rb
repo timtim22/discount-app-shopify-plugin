@@ -12,8 +12,7 @@ class SalesController < ShopifyApp::AuthenticatedController
   # GET /sales/1.json
   def show
     if @sale.sale_target == "Specific collections"
-      @sale_collection = SaleCollection.new
-      @sale_collections = SaleCollection.where(sale_id: @sale.id)
+      @sale_collections = SaleCollection.find_by(sale_id: @sale.id)
     end
   end
 
@@ -25,7 +24,7 @@ class SalesController < ShopifyApp::AuthenticatedController
 
   # GET /sales/1/edit
   def edit
-    @sale_collections = SaleCollection.where(sale_id: @sale.id)
+    @sale_collections = SaleCollection.find_by(sale_id: @sale.id)
   end
 
   # POST /sales
@@ -43,21 +42,24 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.save
         if @sale.sale_target == 'Specific collections'
-          collections = params[:sale][:collections]
-          list = collections.split("$;$")
-          list.each do |collection|
-            sc = SaleCollection.new
-            sc.collection_id, sc.collection_title = collection.split("$,$")
-            sc.sale_id = @sale.id
-            sc.save
+          collections = JSON.parse(params[:sale][:collections])
+          if !collections.empty?
+            collections.each do |k,v|
+              sc = SaleCollection.find_by(sale_id: @sale.id)
+              if sc
+                sc.update(collections: collections)
+              else
+                SaleCollection.create(sale_id: @sale.id, collections: collections)
+              end
+            end
           end
         end
 
         if @sale.scheduled
-          ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
-          DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
+          ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
+          DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
         elsif @sale.Enabled?
-          ActivateSaleJob.perform_later(@sale.id)
+          ActivateSaleWorker.perform_async(@sale.id)
           @sale.update(status: 2)
         end
 
@@ -84,37 +86,37 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.update(sale_params)
         if @sale.sale_target == 'Specific collections'
-          collections = params[:sale][:collections]
+          collections = JSON.parse(params[:sale][:collections])
           if !collections.empty?
-            SaleCollection.where(sale_id: @sale.id).destroy_all
-            list = collections.split("$;$")
-            list.each do |collection|
-              sc = SaleCollection.new
-              sc.collection_id, sc.collection_title = collection.split("$,$")
-              sc.sale_id = @sale.id
-              sc.save
+            collections.each do |k,v|
+              sc = SaleCollection.find_by(sale_id: @sale.id)
+              if sc
+                sc.update(collections: collections)
+              else
+                SaleCollection.create(sale_id: @sale.id, collections: collections)
+              end
             end
           end
         end
 
-        if !@sale.scheduled
+        if !@sale.scheduled or @sale.start_time == "" or @sale.end_time == ""
           @sale.start_time = nil
           @sale.end_time = nil
         else
-          @sale.start_time = DateTime.strptime(params[:sale][:start_time], '%m/%d/%Y %I:%M %p')
-          @sale.end_time = DateTime.strptime(params[:sale][:end_time], '%m/%d/%Y %I:%M %p')
+          @sale.start_time = DateTime.strptime(params[:sale][:start_date]+params[:sale][:start_time], '%m/%d/%Y%I:%M %p')
+          @sale.end_time = DateTime.strptime(params[:sale][:end_date]+params[:sale][:end_time], '%m/%d/%Y%I:%M %p')
         end
         @sale.save
         if @sale.Enabled?
           if @sale.scheduled
-            ActivateSaleJob.set(wait_until: @sale.start_time).perform_later(@sale.id)
-            DeactivateSaleJob.set(wait_until: @sale.end_time).perform_later(@sale.id)
+            ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
+            DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
           else
-            ActivateSaleJob.perform_later(@sale.id)
+            ActivateSaleWorker.perform_async(@sale.id)
             @sale.update(status: 2)
           end
         elsif @sale.Disabled? && check
-          DeactivateSaleJob.perform_later(@sale.id)
+          DeactivateSaleWorker.perform_async(@sale.id)
           @sale.update(status: 3)
         end
         if !@sale.Disabled? && check2
@@ -147,11 +149,11 @@ class SalesController < ShopifyApp::AuthenticatedController
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Disabled?
           if sale.scheduled
-            ActivateSaleJob.set(wait_until: sale.start_time).perform_later(sale.id)
-            DeactivateSaleJob.set(wait_until: sale.end_time).perform_later(sale.id)
+            ActivateSaleWorker.perform_at(sale.start_time, sale.id)
+            DeactivateSaleWorker.perform_at(sale.start_time, sale.id)
             sale.update(status: 0)
           else
-            ActivateSaleJob.perform_later(sale.id)
+            ActivateSaleWorker.perform_async(sale.id)
             sale.update(status: 2)
           end
         elsif sale.Activating? || sale.Deactivating?
@@ -162,7 +164,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     elsif params[:commit] == "Deactivate"
       Sale.find(params[:sale_ids]).each do |sale|
         if sale.Enabled?
-          DeactivateSaleJob.perform_later(sale.id)
+          DeactivateSaleWorker.perform_async(sale.id)
           sale.update(status: 3)
         elsif sale.Activating? || sale.Deactivating?
           redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'

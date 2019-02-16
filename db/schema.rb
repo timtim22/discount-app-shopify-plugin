@@ -43,8 +43,7 @@ ActiveRecord::Schema.define(version: 2019_02_10_084934) do
 
   create_table "sale_collections", force: :cascade do |t|
     t.bigint "sale_id"
-    t.string "collection_id"
-    t.string "collection_title"
+    t.json "collections"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sale_id"], name: "index_sale_collections_on_sale_id"

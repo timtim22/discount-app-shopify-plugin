@@ -1,1 +1,2 @@
-worker: rake jobs:work
+web: bin/rails server -p $PORT -e $RAILS_ENV
+worker: bundle exec sidekiq -c 5

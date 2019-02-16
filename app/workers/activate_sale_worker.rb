@@ -1,9 +1,7 @@
-class ActivateSaleJob < ApplicationJob
-  queue_as :default
+class ActivateSaleWorker
   include Sidekiq::Worker
 
   def perform(*args)
-    # Do something later
     sale = Sale.find(args[0])
     if !sale.Disabled? && !sale.Deactivating?
       if !sale.Activating?

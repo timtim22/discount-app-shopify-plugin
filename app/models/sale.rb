@@ -48,13 +48,13 @@ class Sale < ApplicationRecord
 					products = []
 				end
 			end
-			
+
 		elsif sale_target == 'Specific collections'
-			collections = SaleCollection.where(sale_id: sale_id).pluck(:collection_id)
+			collections = SaleCollection.find_by(sale_id: sale_id).collections
 			if collections.empty?
 				return -1
 			end
-			collections.each do |collection|
+			collections.each do |collection, title|
 				products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants"})
 				page = 1
 				while !products.empty?

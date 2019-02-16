@@ -166,16 +166,7 @@
             <%= form.hidden_field :collections, value: "" %>
             <button type="button" onclick="choose_categories()">Choose Collections</button>
             <br>
-            <div id="cate_target">
-              <% if !@sale_collections.nil? && !@sale_collections.empty? %>
-                <br>
-                <h3>Selected Collections:</h3>
-                <% @sale_collections.each_with_index do |collection, i| %>
-                  <%= (i+1).to_s %>) <%= collection.collection_title  %>
-                  <br>
-                <% end %>
-              <% end %>
-            </div>
+            <div id="cate_target"></div>
           </div>
         </div>
       </div>
@@ -208,6 +199,8 @@
 </article>
 
 <script type="text/javascript">
+  var collections = <%= @sale_collections ?  raw(@sale_collections.collections.to_json) : {} %>;
+
   (function() {
     document.getElementById("nodisplay").style.display='none';
     if (document.getElementById('sale_sale_type_fixed_amount_off').checked){
@@ -219,9 +212,56 @@
     if (document.getElementById("sale_scheduled_true").checked){
       document.getElementById('schedule').style.display='block';
     }
+    if (Object.keys(collections).length > 0){
+      gen_table()
+    }
   })();
 
-  var collections = <%= raw @sale_collections.to_json %>
+  function gen_table(){
+    const target = document.getElementById('cate_target')
+    target.innerHTML = ""
+    br = document.createElement('br')
+    target.appendChild(br)
+    table = document.createElement('table')
+    table.setAttribute('class', 'table')
+    target.appendChild(table)
+
+    th = document.createElement('thead')
+    table.appendChild(th)
+
+    thtr = document.createElement('tr')
+    text = document.createTextNode('Selected Collections')
+    thtrtd = document.createElement('td')
+    thtrtd.appendChild(text)
+    thtrtd.setAttribute('colspan', '2')
+    thtr.appendChild(thtrtd)
+    th.appendChild(thtr)
+
+    tb = document.createElement('tbody')
+    table.appendChild(tb)
+
+    for (k in collections){
+      tr = document.createElement('tr')
+      td = document.createElement('td')
+      text = document.createTextNode(collections[k])
+      td.setAttribute('id', k)
+      td.appendChild(text)
+      tr.appendChild(td)
+      td = document.createElement('td')
+      td.innerHTML = '<i class="icon-trash"></i>';
+      td.setAttribute('id', k)
+      td.setAttribute('onClick', 'unselect_collection(this)')
+      tr.appendChild(td)
+      tb.appendChild(tr)
+    }
+  }
+
+  function unselect_collection(e){
+    id = e.getAttribute("id")
+    e.parentNode.parentNode.removeChild(e.parentNode)
+    delete collections[id]
+    document.getElementById("sale_collections").value = JSON.stringify(collections)
+  }
 
   function choose_categories(){
     var multipleCollectionOptions = {
@@ -237,28 +277,11 @@
         return;
       }
       if (data.collections.length > 0) {
-
-        var target = document.getElementById('cate_target')
-        target.innerHTML = ""
-        br = document.createElement('br')
-        target.appendChild(br)
-        var h = document.createElement("H3")
-        var t = document.createTextNode("Selected Collections:")
-        h.appendChild(t);
-        target.appendChild(h)
-        const hf = document.getElementById("sale_collections")
-        hf.value= ""
-
-        for(i=0; i < data.collections.length; i++){
-          if (i > 0){
-            br = document.createElement('br')
-            target.appendChild(br)
-          }
-          txt = document.createTextNode(String(i+1)+") "+data.collections[i].title)
-          target.appendChild(txt)
-          collections[data.collections[i].id] = data.collections[i].title
-          hf.value += data.collections[i].id + "$,$" + data.collections[i].title+ "$;$"
+        for(i=0; i< data.collections.length; i++){
+          collections[String(data.collections[i].id)] = data.collections[i].title
         }
+        gen_table()
+        document.getElementById("sale_collections").value = JSON.stringify(collections)
       }
       if (data.errors) {
         ShopifyApp.flashError(data.errors);
