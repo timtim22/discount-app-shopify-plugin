@@ -1,5 +1,6 @@
 class ActivateSaleWorker
   include Sidekiq::Worker
+	sidekiq_options retry: 3
 
   def perform(*args)
     sale = Sale.find(args[0])
