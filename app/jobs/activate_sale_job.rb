@@ -1,6 +1,5 @@
 class ActivateSaleJob < ApplicationJob
   queue_as :default
-  include Sidekiq::Worker
 
   def perform(*args)
     # Do something later
