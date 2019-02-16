@@ -86,14 +86,16 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.update(sale_params)
         if @sale.sale_target == 'Specific collections'
-          collections = JSON.parse(params[:sale][:collections])
-          if !collections.empty?
-            collections.each do |k,v|
-              sc = SaleCollection.find_by(sale_id: @sale.id)
-              if sc
-                sc.update(collections: collections)
-              else
-                SaleCollection.create(sale_id: @sale.id, collections: collections)
+          if params[:sale][:collections]
+            collections = JSON.parse(params[:sale][:collections])
+            if !collections.empty?
+              collections.each do |k,v|
+                sc = SaleCollection.find_by(sale_id: @sale.id)
+                if sc
+                  sc.update(collections: collections)
+                else
+                  SaleCollection.create(sale_id: @sale.id, collections: collections)
+                end
               end
             end
           end
