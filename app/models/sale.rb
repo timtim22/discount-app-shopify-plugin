@@ -50,7 +50,12 @@ class Sale < ApplicationRecord
 			end
 
 		elsif sale_target == 'Specific collections'
-			collections = SaleCollection.find_by(sale_id: sale_id).collections
+			sc = SaleCollection.find_by(sale_id: sale_id)
+			if sc
+				collections = SaleCollection.find_by(sale_id: sale_id).collections
+			else
+				collections = {}
+			end
 			if collections.empty?
 				return -1
 			end
