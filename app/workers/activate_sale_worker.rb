@@ -1,6 +1,11 @@
 class ActivateSaleWorker
   include Sidekiq::Worker
-	sidekiq_options retry: 3
+  sidekiq_options retry: 3, lock: :until_executed,
+                  unique_args: :unique_args
+
+  def self.unique_args(args)
+    Sale.find(args[0]).shop_id
+  end
 
   def perform(*args)
     sale = Sale.find(args[0])
