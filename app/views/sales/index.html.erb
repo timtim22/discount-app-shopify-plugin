@@ -8,7 +8,7 @@
         <%= link_to 'New Sale on specific collections', new_sale_path, class: 'button', style: 'padding: 10px 20px; font-weight: bold; margin-bottom: 1rem;' %>
       </div>
       <div class="row">
-        <h2 class="align-left" style="margin-bottom: 0px;">ExpressDiscounts Dashboard</h2>
+        <h2 class="align-left" style="margin-bottom: 0px;">ExpressSales Dashboard</h2>
       </div>
       <div class="row" style="text-align: center; overflow-x:auto;">
         <% if !@sales.empty? %>
@@ -27,7 +27,7 @@
                   <th colspan="3"></th>
                 </tr>
               </thead>
-            
+
               <tbody>
                 <% @sales.each do |sale| %>
                   <tr>
@@ -62,7 +62,7 @@
           <% end %>
         <% else %>
           <br/>
-          <p>You have no sales to view. Click the "New Sale" button above to add a sale.</p>
+          <p>As you have installed the app on your store, you can now set a discount with a few clicks. Just select "New Sale on whole store" or "New Sale on specific collection" to get started. You can see your sale status on this Dashboard once you create it. Contact us if you need any assistance or send an e-mail to: support@marbgroup.com.</p>
         <% end %>
       </div>
     </div>
