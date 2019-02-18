@@ -1,6 +1,6 @@
 class ActivateSaleWorker
   include Sidekiq::Worker
-  sidekiq_options retry: 3, lock: :until_executed,
+  sidekiq_options retry: 3, lock: :until_executed, unique_across_workers: true,
                   unique_args: :unique_args
 
   def self.unique_args(args)
