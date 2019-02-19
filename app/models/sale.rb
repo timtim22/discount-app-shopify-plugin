@@ -105,10 +105,29 @@ class Sale < ApplicationRecord
 
 	def deactivate_sale
 		sale_id = self.id
+		client = ShopifyAPI::GraphQL.new
+		VARIANT_UPDATE_QUERY = client.parse <<-'GRAPHQL'
+		mutation($id: ID!, $price: Money) {
+			productVariantUpdate(input: {id: $id, price: $price}) {
+				productVariant{
+					price
+			    }
+			}
+		}
+		GRAPHQL
+		gqc = 1000
 		OldPrice.where(sale_id: sale_id).find_each do |old_price|
-			if ShopifyAPI.credit_left < 5
+			graphql = false
+			if ShopifyAPI.credit_left < 5 && gqc < 200
+				puts 'sleeping, no graphql or rest credits left'
 				sleep 10.seconds
-				puts "Sleeping"
+				use_graphql = false
+			elsif ShopifyAPI.credit_left < 5
+				use_graphql = true
+				puts "Credits less than 5! Switching to GraphQL"
+			else
+				use_graphql = false
+				puts "Have enough credits for REST api now!"
 			end
 			product = ShopifyAPI::Product.new
 			product.id = old_price.product_id.to_i
@@ -118,11 +137,17 @@ class Sale < ApplicationRecord
 				variant.id = k
 				variant.price = v
 				product.variants.push(variant)
+				if use_graphql
+					result = client.query(VARIANT_UPDATE_QUERY, variables: {id: k, price: v})
+					gqc = result.extensions["cost"]["throttleStatus"]["currentlyAvailable"]
+				end
 			end
-			begin
-				product.save
-			rescue ActiveResource::ResourceNotFound
-				puts "Product has been deleted."
+			if !use_graphql
+				begin
+					product.save
+				rescue ActiveResource::ResourceNotFound
+					puts "Product has been deleted."
+				end
 			end
 			old_price.destroy
 		end
