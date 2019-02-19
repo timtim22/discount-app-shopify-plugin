@@ -106,7 +106,7 @@ class Sale < ApplicationRecord
 	def deactivate_sale
 		sale_id = self.id
 		client = ShopifyAPI::GraphQL.new
-		VARIANT_UPDATE_QUERY = client.parse <<-'GRAPHQL'
+		variant_update_query = client.parse <<-'GRAPHQL'
 		mutation($id: ID!, $price: Money) {
 			productVariantUpdate(input: {id: $id, price: $price}) {
 				productVariant{
@@ -138,7 +138,7 @@ class Sale < ApplicationRecord
 				variant.price = v
 				product.variants.push(variant)
 				if use_graphql
-					result = client.query(VARIANT_UPDATE_QUERY, variables: {id: k, price: v})
+					result = client.query(variant_update_query, variables: {id: k, price: v})
 					gqc = result.extensions["cost"]["throttleStatus"]["currentlyAvailable"]
 				end
 			end
