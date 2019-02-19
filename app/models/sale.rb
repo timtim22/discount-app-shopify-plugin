@@ -117,7 +117,7 @@ class Sale < ApplicationRecord
 		GRAPHQL
 		gqc = 1000
 		OldPrice.where(sale_id: sale_id).find_each do |old_price|
-			graphql = false
+			use_graphql = false
 			if ShopifyAPI.credit_left < 5 && gqc < 200
 				puts 'sleeping, no graphql or rest credits left'
 				sleep 10.seconds
