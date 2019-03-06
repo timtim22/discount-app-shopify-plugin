@@ -40,6 +40,88 @@
     <hr>
     <div class="container" style="text-align: center">
       <p>Have an issue? Or even a question?</p>
+      <a onclick="$('#faq').toggle('slow')" class='button' >F.A.Q.</a>
+      <div id="faq" style="display: none">
+        <br/>
+        <section>
+          <article>
+            <div class="card">
+<br/>
+<b>How do I install the application?</b>
+<br/>
+You only need to install it using the Shopify store and give the permissions required by the application to it. There is nothing else to configure to use the application. After installation you can create sales.
+<br/><br/>
+<hr/>
+<br/>
+<b>How to create a sale?</b>
+<br/>
+1) From your main dashboard click the "New Sale on whole store" or "New Sale on collections" button.<br/>
+2) Fill out the form options provided and check the activate radio button if you want it activate it right away or deactivate if you plan to activate it later on and just fill in the details of the sale. It is recommended that you have a latest backup CSV file of your products when using the application, in case something goes terribly wrong.
+<br/><br/>
+<hr/>
+<br/>
+<b>What is the minimum information do I need to put to create a sale?</b>
+<br/>
+You have to add at least a title, choose whether it is a percentage based or fixed amount based sale and fill out the amount of that sale, also decide if you want to activate the sale right now or save it for later. In case of collections you should also choose which collections you want to put the sale on.
+<br/><br/>
+<hr/>
+<br/>
+<b>What will happen to a product in multiple collections when putting those products on sale?</b>
+<br/>
+One sale will put a product on sale only once even if it is present in the multiple collections that you have chosen.
+<br/><br/>
+<hr/>
+<br/>
+<b>How can I make changes to a sale?</b>
+<br/>
+You can only make changes such as change in amount or title or amount or schedule or collection of a sale when it is being created or if it is deactivated. You can not make changes to a sale that is currently running, you have to deactivate the sale first. Also you can not make any changes or deactivate a sale while it is activating or deactivating, because those processes can not be stopped once started. You have to wait for the activation/deactivation process to finish before you can change anything about a sale.
+<br/><br/>
+<hr/>
+<br/>
+<b>How can I delete a sale?</b>
+<br/>
+You can only delete sales that are currently disabled or inactive.
+<br/><br/>
+<hr/>
+<br/>
+<b>What if I want to add sale on specific products?</b>
+<br/>
+If you wish to add sale on specific products you can either manually add it from the Shopify admin panel or add them to a collection and then put that collection on sale.
+<br/><br/>
+<hr/>
+<br/>
+<b>What if I want multiple sales?</b>
+<br/>
+It is recommended to use a single sale where possible, if not, in case of multiple sales on same products, you should inactive the sale you last activated first. As when you deactivate a sale the prices revert to the ones which were there when the sale was activated.
+<br/><br/>
+<hr/>
+<br/>
+<b>What if I accidentally deactivate a sale out of order, for example had two sales on overlapping products and deactivated the one that was places before the last one?</b>
+<br/>
+Your prices will change to the ones that where in place when you activated the sale that you deactivated. In this case please do not deactivate the sale out that you skipped deactivating, submit a ticket from within the application or send us an email so we can remove the records or assist you as you require.
+<br/><br/>
+<hr/>
+<br/>
+<b>I added new products after activating the sale what will happen to them?</b>
+<br/>
+Products added after the activation procedure is completed will not be put on that sale. Also it is recommended to not to add the products during the activation process as they might get skipped.
+<br/><br/>
+<hr/>
+<br/>
+<b>What should I do if I face an issue or have a question not in this F.A.Q.?</b>
+<br/>
+Please submit a ticket from inside the application or send us an email at support@marbgroup.com, we will assist you as soon as possible. Your problems are our number one priority.
+<br/><br/>
+<hr/>
+<br/>
+<b>How can I request a feature or report a bug in the application?</b>
+<br/>
+If you find anything that can make your experience with the application better, please let us know by submitting a ticket or sending us an email at support@marbgroup.com. We are here to make your lives easier.
+<br/><br/>
+</div>
+</article>
+</section>
+      </div>
       <a onclick="document.getElementById('ticket').style.display='block'" class='button' >Submit a ticket</a>
       <div id="ticket" style="display: none">
         <%= render "tickets/form", ticket: Ticket.new %>

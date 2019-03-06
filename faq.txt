@@ -1,0 +1,62 @@
+Discount Application F.A.Q.
+__________________________________________________________________________________________________________________________
+
+Q) How do I install the application?
+
+A) You only need to install it using the Shopify store and give the permissions required by the application to it. There is nothing else to configure to use the application. After installation you can create sales.
+__________________________________________________________________________________________________________________________
+
+Q) How to create a sale?
+
+A) 1) From your main dashboard click the "New Sale on whole store" or "New Sale on collections" button.
+2) Fill out the form options provided and check the activate radio button if you want it activate it right away or deactivate if you plan to activate it later on and just fill in the details of the sale. It is recommended that you have a latest backup CSV file of your products when using the application, in case something goes terribly wrong.
+__________________________________________________________________________________________________________________________
+
+Q) What is the minimum information do I need to put to create a sale?
+
+A) You have to add at least a title, choose whether it is a percentage based or fixed amount based sale and fill out the amount of that sale, also decide if you want to activate the sale right now or save it for later. In case of collections you should also choose which collections you want to put the sale on.
+__________________________________________________________________________________________________________________________
+
+Q) What will happen to a product in multiple collections when putting those products on sale?
+
+A) One sale will put a product on sale only once even if it is present in the multiple collections that you have chosen.
+__________________________________________________________________________________________________________________________
+
+Q) How can I make changes to a sale?
+
+A) You can only make changes such as change in amount or title or amount or schedule or collection of a sale when it is being created or if it is deactivated. You can not make changes to a sale that is currently running, you have to deactivate the sale first. Also you can not make any changes or deactivate a sale while it is activating or deactivating, because those processes can not be stopped once started. You have to wait for the activation/deactivation process to finish before you can change anything about a sale.
+__________________________________________________________________________________________________________________________
+
+Q) How can I delete a sale?
+
+A) You can only delete sales that are currently disabled or inactive.
+__________________________________________________________________________________________________________________________
+
+Q) What if I want to add sale on specific products?
+
+A) If you wish to add sale on specific products you can either manually add it from the Shopify admin panel or add them to a collection and then put that collection on sale.
+__________________________________________________________________________________________________________________________
+
+Q) What if I want multiple sales?
+
+A) It is recommended to use a single sale where possible, if not, in case of multiple sales on same products, you should inactive the sale you last activated first. As when you deactivate a sale the prices revert to the ones which were there when the sale was activated.
+__________________________________________________________________________________________________________________________
+
+Q) What if I accidentally deactivate a sale out of order, for example had two sales on overlapping products and deactivated the one that was places before the last one?
+
+A) Your prices will change to the ones that where in place when you activated the sale that you deactivated. In this case please do not deactivate the sale out that you skipped deactivating, submit a ticket from within the application or send us an email so we can remove the records or assist you as you require.
+__________________________________________________________________________________________________________________________
+
+Q) I added new products after activating the sale what will happen to them?
+
+A) Products added after the activation procedure is completed will not be put on that sale. Also it is recommended to not to add the products during the activation process as they might get skipped.
+__________________________________________________________________________________________________________________________
+
+Q) What should I do if I face an issue or have a question not in this F.A.Q.?
+
+A) Please submit a ticket from inside the application or send us an email at support@marbgroup.com, we will assist you as soon as possible. Your problems are our number one priority.
+__________________________________________________________________________________________________________________________
+
+Q) How can I request a feature or report a bug in the application?
+
+A) If you find anything that can make your experience with the application better, please let us know by submitting a ticket or sending us an email at support@marbgroup.com. We are here to make your lives easier.
