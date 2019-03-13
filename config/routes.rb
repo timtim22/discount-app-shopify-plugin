@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   	end
   end
   post '/webhooks/app_uninstalled', to: "shops#uninstall"
+  get '/activatecharge', to: 'sales#activate_charge'
   root :to => 'sales#index'
   mount ShopifyApp::Engine, at: '/'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
