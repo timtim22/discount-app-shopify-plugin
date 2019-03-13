@@ -65,7 +65,7 @@
         <div class="card">
           <h5>Schedule</h5>
           <div class="row side-elements">
-            <%= form.label :start_date_and_time %>
+            <%= form.label :start_time %>
             <div class='input-group date' id='datetimepicker1'>
               <%= form.text_field :start_date %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
@@ -76,7 +76,7 @@
           </div>
 
           <div class="row side-elements">
-            <%= form.label :end_date_and_time %>
+            <%= form.label :end_time %>
             <div class='input-group date' id='datetimepicker2' style="margin-left: 4.67px">
               <%= form.text_field :end_date %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
@@ -90,9 +90,11 @@
         <script type="text/javascript">
           $(function () {
             $('#datetimepicker1').datetimepicker({
+              <%= raw("date: new Date('"+@sale.start_time.to_s+"'),") if @sale.start_time %>
               minDate: new Date().toISOString()
             });
             $('#datetimepicker2').datetimepicker({
+              <%= raw("date: new Date('"+@sale.end_time.to_s+"'),") if @sale.end_time %>
               useCurrent: false //Important! See issue #1075
             });
             $("#datetimepicker1").on("dp.change", function (e) {
