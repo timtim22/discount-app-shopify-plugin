@@ -7,10 +7,10 @@ module ShopifyApp
 
     def callback
       if auth_hash
+        create_recurring_application_charge
         login_shop
         install_webhooks
         install_scripttags
-        create_recurring_application_charge
         perform_after_authenticate_job
 
       else
@@ -28,8 +28,7 @@ module ShopifyApp
                 name: "ExpressSales Monthly Charge",
                 price: 8.99,
                 return_url: ENV['DOMAIN']+"/activatecharge",
-                trial_days: 4,
-                test: true)
+                trial_days: 4)
 
         if recurring_application_charge.save
           redirect_to recurring_application_charge.confirmation_url

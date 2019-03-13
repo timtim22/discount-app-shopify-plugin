@@ -59,77 +59,49 @@
         <div class="alert notice">
           <dl>
             <dt>Notice Alert</dt>
-            <dd>Timezone is UTC.</dd>
+            <dd id="tz" >Time is in</dd>
           </dl>
         </div>
         <div class="card">
           <h5>Schedule</h5>
           <div class="row side-elements">
-            <%= form.label :start_date %>
+            <%= form.label :start_date_and_time %>
             <div class='input-group date' id='datetimepicker1'>
               <%= form.text_field :start_date %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
                   <span class="glyphicon glyphicon-calendar"></span>
               </span>
+              <%= form.hidden_field :parsed_start_date, value: "" %>
             </div>
           </div>
+
           <div class="row side-elements">
-            <%= form.label :start_time %>
-            <div class='input-group date' id='datetimepicker3'>
-              <%= form.text_field :start_time %>
-              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
-                  <span class="glyphicon glyphicon-time"></span>
-              </span>
-            </div>
-          </div>
-          <div class="row side-elements">
-            <%= form.label :end_date %>
+            <%= form.label :end_date_and_time %>
             <div class='input-group date' id='datetimepicker2' style="margin-left: 4.67px">
               <%= form.text_field :end_date %>
               <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
                   <span class="glyphicon glyphicon-calendar"></span>
               </span>
+              <%= form.hidden_field :parsed_end_date, value: "" %>
             </div>
           </div>
-          <div class="row side-elements">
-            <%= form.label :end_time %>
-            <div class='input-group date' id='datetimepicker4' style="margin-left: 4.67px">
-              <%= form.text_field :end_time %>
-              <span class="input-group-addon" style="padding: 0.9rem 2.2rem 0.9rem 1.0rem">
-                  <span class="glyphicon glyphicon-time"></span>
-              </span>
-            </div>
-          </div>
+
         </div>
         <script type="text/javascript">
           $(function () {
             $('#datetimepicker1').datetimepicker({
-              format: 'MM/DD/YYYY',
-              minDate: "<%= DateTime.now.utc.strftime('%m/%d/%Y %I:%M %p')%>"
+              minDate: new Date().toISOString()
             });
             $('#datetimepicker2').datetimepicker({
-              format: 'MM/DD/YYYY',
               useCurrent: false //Important! See issue #1075
             });
             $("#datetimepicker1").on("dp.change", function (e) {
+              document.getElementById("sale_parsed_start_date").value = e.date.format("YYYY-MM-DD[T]HH:mm Z");
               $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
             });
             $("#datetimepicker2").on("dp.change", function (e) {
+              document.getElementById("sale_parsed_end_date").value = e.date.format("YYYY-MM-DD[T]HH:mm Z");
               $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
-            });
-            $('#datetimepicker3').datetimepicker({
-              format: 'LT',
-              minDate: "<%= DateTime.now.utc.strftime('%m/%d/%Y %I:%M %p')%>"
-            });
-            $('#datetimepicker4').datetimepicker({
-              format: 'LT',
-              useCurrent: false //Important! See issue #1075
-            });
-            $("#datetimepicker3").on("dp.change", function (e) {
-              $('#datetimepicker4').data("DateTimePicker").minDate(e.date);
-            });
-            $("#datetimepicker4").on("dp.change", function (e) {
-              $('#datetimepicker3').data("DateTimePicker").maxDate(e.date);
             });
           });
         </script>
@@ -202,6 +174,8 @@
   var collections = <%= @sale_collections ?  raw(@sale_collections.collections.to_json) : {} %>;
 
   (function() {
+    var tz = new Date().toString().split("(")[1].slice(0,-1);
+    document.getElementById("tz").append(" "+ tz);
     document.getElementById("nodisplay").style.display='none';
     if (document.getElementById('sale_sale_type_fixed_amount_off').checked){
       document.getElementById('amount_suffix').innerHTML = '<%= @currency %>';
