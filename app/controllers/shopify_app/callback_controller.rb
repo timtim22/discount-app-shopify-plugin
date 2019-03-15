@@ -7,11 +7,14 @@ module ShopifyApp
 
     def callback
       if auth_hash
-        create_recurring_application_charge
-        login_shop
-        install_webhooks
-        install_scripttags
-        perform_after_authenticate_job
+
+          login_shop
+          install_webhooks
+          install_scripttags
+          perform_after_authenticate_job
+        if !Shop.find_by(shopify_domain: shop_name).activated
+          create_recurring_application_charge
+        end
 
       else
         flash[:error] = I18n.t('could_not_log_in')
@@ -23,7 +26,8 @@ module ShopifyApp
 
     def create_recurring_application_charge
       ShopifyAPI::Base.activate_session(ShopifyAPI::Session.new(shop_name, token))
-      unless ShopifyAPI::RecurringApplicationCharge.current
+      current_charge = ShopifyAPI::RecurringApplicationCharge.current
+      if current_charge.nil? || current_charge.status != "accepted"
         recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new(
                 name: "ExpressSales Monthly Charge",
                 price: 8.99,

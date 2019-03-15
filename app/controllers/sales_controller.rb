@@ -6,14 +6,22 @@ class SalesController < ShopifyApp::AuthenticatedController
 
   def activate_charge
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.find(request.params['charge_id'])
-    recurring_application_charge.status == "accepted" ? recurring_application_charge.activate : redirect_to(root_url)
-
-    redirect_to root_url
+    if recurring_application_charge.status == "accepted"
+      if recurring_application_charge.activate
+        Shop.find_by(shopify_domain: session[:shopify_domain]).update(activated: true)
+        redirect_to root_url
+      end
+    end
   end
 
   def index
-    @shop = ShopifyAPI::Shop.current
-    @sales = Sale.where(shop_id: Shop.find_by(shopify_domain: @shop.myshopify_domain).id).order(:id)
+    ls = Shop.find_by(shopify_domain: session[:shopify_domain])
+    if ls.activated
+      @shop = ShopifyAPI::Shop.current
+      @sales = Sale.where(shop_id: ls.id).order(:id)
+    else
+      redirect_to logout_url
+    end
   end
 
   # GET /sales/1
