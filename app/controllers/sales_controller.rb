@@ -20,7 +20,16 @@ class SalesController < ShopifyApp::AuthenticatedController
       @shop = ShopifyAPI::Shop.current
       @sales = Sale.where(shop_id: ls.id).order(:id)
     else
-      redirect_to logout_url
+      recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new(
+        name: "ExpressSales Monthly Charge",
+        price: 8.99,
+        return_url: ENV['DOMAIN']+"/activatecharge",
+        trial_days: 4)
+
+      if recurring_application_charge.save
+        @ru = recurring_application_charge.confirmation_url
+        render 'charge_redirect', :layout => false
+      end
     end
   end
 

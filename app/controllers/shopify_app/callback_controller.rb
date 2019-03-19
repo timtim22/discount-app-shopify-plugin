@@ -38,6 +38,9 @@ module ShopifyApp
           redirect_to recurring_application_charge.confirmation_url
         end
       else
+        if current_charge && current_charge.status == "accepted"
+          Shop.find_by(shopify_domain: shop_name).update(activated: true)
+        end
         redirect_to return_address
       end
     end
