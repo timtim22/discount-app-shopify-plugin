@@ -20,7 +20,6 @@ module ShopifyApp
         flash[:error] = I18n.t('could_not_log_in')
         redirect_to login_url
       end
-      head :ok
     end
 
     private
