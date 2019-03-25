@@ -4,10 +4,10 @@ module ShopifyApp
   # Performs login after OAuth completes
   class CallbackController < ActionController::Base
     include ShopifyApp::LoginProtection
-    layout false
 
     def callback
       if auth_hash
+
           login_shop
           install_webhooks
           install_scripttags
@@ -15,11 +15,11 @@ module ShopifyApp
         if !Shop.find_by(shopify_domain: shop_name).activated
           create_recurring_application_charge
         end
+
       else
         flash[:error] = I18n.t('could_not_log_in')
         redirect_to login_url
       end
-      redirect_to root_url
     end
 
     private
