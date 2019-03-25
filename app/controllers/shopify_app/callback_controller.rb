@@ -4,6 +4,7 @@ module ShopifyApp
   # Performs login after OAuth completes
   class CallbackController < ActionController::Base
     include ShopifyApp::LoginProtection
+    layout false
 
     def callback
       if auth_hash
@@ -18,7 +19,6 @@ module ShopifyApp
         flash[:error] = I18n.t('could_not_log_in')
         redirect_to login_url
       end
-      render plain: "OK"
     end
 
     private
