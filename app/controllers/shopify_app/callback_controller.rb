@@ -14,6 +14,8 @@ module ShopifyApp
           perform_after_authenticate_job
         if !Shop.find_by(shopify_domain: shop_name).activated
           create_recurring_application_charge
+        else
+          redirect_to return_address
         end
 
       else
