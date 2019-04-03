@@ -66,7 +66,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
     respond_to do |format|
       if @sale.save
-        if @sale.sale_target == 'Specific collections'
+        if @sale.sale_target == 'Specific collections' && params[:sale][:collections] != ""
           collections = JSON.parse(params[:sale][:collections])
           if !collections.empty?
             collections.each do |k,v|
@@ -111,7 +111,7 @@ class SalesController < ShopifyApp::AuthenticatedController
     respond_to do |format|
       if @sale.update(sale_params)
         if @sale.sale_target == 'Specific collections'
-          if params[:sale][:collections]
+          if params[:sale][:collections] && params[:sale][:collections] != ""
             collections = JSON.parse(params[:sale][:collections])
             if !collections.empty?
               collections.each do |k,v|
