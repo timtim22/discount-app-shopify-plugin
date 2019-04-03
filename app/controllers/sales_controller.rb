@@ -180,7 +180,7 @@ class SalesController < ShopifyApp::AuthenticatedController
           if sale.scheduled
             sale.update(status: 0)
             ActivateSaleWorker.perform_at(sale.start_time, sale.id)
-            DeactivateSaleWorker.perform_at(sale.start_time, sale.id)
+            DeactivateSaleWorker.perform_at(sale.end_time, sale.id)
 
           else
             sale.update(status: 2)
