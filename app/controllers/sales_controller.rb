@@ -82,7 +82,7 @@ class SalesController < ShopifyApp::AuthenticatedController
 
         if @sale.scheduled
           ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
-          DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
+          DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id)
         elsif @sale.Enabled?
           @sale.update(status: 2)
           ActivateSaleWorker.perform_async(@sale.id)
@@ -137,7 +137,7 @@ class SalesController < ShopifyApp::AuthenticatedController
         if @sale.Enabled?
           if @sale.scheduled
             ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
-            DeactivateSaleWorker.perform_at(@sale.start_time, @sale.id)
+            DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id)
           else
             @sale.update(status: 2)
             ActivateSaleWorker.perform_async(@sale.id)
