@@ -23,7 +23,7 @@ class Sale < ApplicationRecord
 					if old_price.nil?
 						variants = {}
 						product.variants.each do |variant|
-							if variant.price.to_f > 0 || variant.compare_at_price < variant.price
+							if variant.price.to_f > 0 || (variant.compare_at_price && variant.compare_at_price < variant.price)
 								if variant.compare_at_price.nil?
 									variant.compare_at_price = variant.price
 								end
