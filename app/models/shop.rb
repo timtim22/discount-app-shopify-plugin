@@ -35,6 +35,99 @@ class Shop < ActiveRecord::Base
 			count += 250
 			puts count
 		end
-
 	end
+
+	def transfer(target_shop_id)
+		target_shop = Shop.find(target_shop_id)
+		attributes_to_remove =  %w(admin_graphql_api_id created_at updated_at id published_at)
+
+
+		page = 1
+		count = 1
+		self.with_shopify_session do
+
+			#copy smart collections
+			while all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
+
+				page += 1
+				target_shop.with_shopify_session do
+					all_smart_collections.each do |smart_collection|
+					  if ShopifyAPI.credit_left < 5
+					    sleep 10.seconds
+					  end
+					  hashed_smart_collection = JSON.parse smart_collection.to_json
+					  attributes_to_remove.each {|attribute| hashed_smart_collection.delete attribute }
+					  ShopifyAPI::SmartCollection.create hashed_smart_collection
+					  puts "Smart collection # #{count} copied"
+					  count += 1
+					end
+				end
+			end
+
+			#copy custom collections
+			page = 1
+			count = 1
+			custom_collection_product_ids = []
+			while all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
+
+				page += 1
+				target_shop.with_shopify_session do
+					all_custom_collections.each do |custom_collection|
+					  if ShopifyAPI.credit_left < 5
+					    sleep 10.seconds
+					  end
+					  hashed_custom_collection = JSON.parse custom_collection.to_json
+					  attributes_to_remove.each {|attribute| hashed_custom_collection.delete attribute }
+					  new_custom_collection = ShopifyAPI::CustomCollection.create hashed_custom_collection
+					  puts "Custom collection # #{count} copied"
+					  count += 1
+
+					  self.with_shopify_session do
+						  c_page = 1
+						  c_count = 1
+						  while products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
+						  	c_page += 1
+						  	products.each do |product|
+						  		if ShopifyAPI.credit_left < 5
+								    sleep 10.seconds
+								  end
+								  hashed_product = JSON.parse product.to_json
+								  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
+
+								  target_shop.with_shopify_session do
+									  new_product = ShopifyAPI::Product.create hashed_product
+									  ShopifyAPI::Collect.create!({product_id: new_product.id, collection_id: new_custom_collection.id})
+									  custom_collection_product_ids << product.id
+									  puts "Product # #{count} of this collection copied"
+				  					c_count += 1
+									end
+						  	end
+						  end
+						end
+					end
+				end
+			end
+
+			page = 1
+			count = 1
+			while products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
+				target_shop.with_shopify_session do
+					products.each do |product|
+						unless custom_collection_product_ids.include? product.id
+							if ShopifyAPI.credit_left < 5
+						    sleep 10.seconds
+						  end
+						  hashed_product = JSON.parse product.to_json
+						  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
+						  ShopifyAPI::Product.create hashed_product
+						  puts "Product # #{count} copied"
+						  count += 1
+						end
+					end
+				end
+			end
+
+		end
+	end
+
 end
