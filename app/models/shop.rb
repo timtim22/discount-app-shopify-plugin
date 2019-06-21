@@ -73,7 +73,7 @@ class Shop < ActiveRecord::Base
 			count = 1
 			custom_collection_product_ids = []
 			all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
-			while !all_custom_collections.epmty?
+			while !all_custom_collections.empty?
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
 			  end
