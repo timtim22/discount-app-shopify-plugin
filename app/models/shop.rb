@@ -47,7 +47,8 @@ class Shop < ActiveRecord::Base
 		self.with_shopify_session do
 
 			#copy smart collections
-			while all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
+			all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
+			while !all_smart_collections.empty?
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
 			  end
@@ -64,13 +65,15 @@ class Shop < ActiveRecord::Base
 					  end
 					end
 				end
+				all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
 			end
 
 			#copy custom collections
 			page = 1
 			count = 1
 			custom_collection_product_ids = []
-			while all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
+			all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
+			while !all_custom_collections.epmty?
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
 			  end
@@ -89,7 +92,8 @@ class Shop < ActiveRecord::Base
 					  self.with_shopify_session do
 						  c_page = 1
 						  c_count = 1
-						  while products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
+						  products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
+						  while !products.empty?
 						  	if ShopifyAPI.credit_left < 10
 							    sleep 10.seconds
 							  end
@@ -110,15 +114,18 @@ class Shop < ActiveRecord::Base
 									  end
 									end
 						  	end
+						  	products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
 						  end
 						end
 					end
 				end
+				all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
 			end
 
 			page = 1
 			count = 1
-			while products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
+			products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
+			while !products.empty?
 				target_shop.with_shopify_session do
 					if ShopifyAPI.credit_left < 10
 				    sleep 10.seconds
@@ -136,6 +143,7 @@ class Shop < ActiveRecord::Base
 						end
 					end
 				end
+				products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
 			end
 
 		end
