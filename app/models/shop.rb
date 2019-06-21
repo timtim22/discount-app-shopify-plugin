@@ -54,11 +54,10 @@ class Shop < ActiveRecord::Base
 				page += 1
 				target_shop.with_shopify_session do
 					all_smart_collections.each do |smart_collection|
-
 					  hashed_smart_collection = JSON.parse smart_collection.to_json
 					  attributes_to_remove.each {|attribute| hashed_smart_collection.delete attribute }
 					  ShopifyAPI::SmartCollection.create hashed_smart_collection
-					  puts "Smart collection # #{count} copied"
+					  puts "Smart collection # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
 					  count += 1
 					  if ShopifyAPI.credit_left < 10
 					    sleep 10.seconds
@@ -82,7 +81,7 @@ class Shop < ActiveRecord::Base
 					  hashed_custom_collection = JSON.parse custom_collection.to_json
 					  attributes_to_remove.each {|attribute| hashed_custom_collection.delete attribute }
 					  new_custom_collection = ShopifyAPI::CustomCollection.create hashed_custom_collection
-					  puts "Custom collection # #{count} copied"
+					  puts "Custom collection # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
 					  count += 1
 					  if ShopifyAPI.credit_left < 10
 					    sleep 10.seconds
@@ -104,7 +103,7 @@ class Shop < ActiveRecord::Base
 									  new_product = ShopifyAPI::Product.create hashed_product
 									  ShopifyAPI::Collect.create!({product_id: new_product.id, collection_id: new_custom_collection.id})
 									  custom_collection_product_ids << product.id
-									  puts "Product # #{count} of this collection copied"
+									  puts "Product # #{count} of this collection copied, API limit left: #{ShopifyAPI.credit_left}"
 				  					c_count += 1
 				  					if ShopifyAPI.credit_left < 10
 									    sleep 10.seconds
@@ -126,11 +125,10 @@ class Shop < ActiveRecord::Base
 				  end
 					products.each do |product|
 						unless custom_collection_product_ids.include? product.id
-
 						  hashed_product = JSON.parse product.to_json
 						  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
 						  ShopifyAPI::Product.create hashed_product
-						  puts "Product # #{count} copied"
+						  puts "Product # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
 						  count += 1
 						  if ShopifyAPI.credit_left < 10
 						    sleep 10.seconds
