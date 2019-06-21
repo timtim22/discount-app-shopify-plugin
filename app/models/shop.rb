@@ -102,12 +102,14 @@ class Shop < ActiveRecord::Base
 
 								  hashed_product = JSON.parse product.to_json
 								  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
-
+								  hashed_product['variants'].each do |v|
+								  	v.delete 'image_id'
+								  end
 								  target_shop.with_shopify_session do
 									  new_product = ShopifyAPI::Product.create hashed_product
 									  ShopifyAPI::Collect.create!({product_id: new_product.id, collection_id: new_custom_collection.id})
 									  custom_collection_product_ids << product.id
-									  puts "Product # #{count} of this collection copied, API limit left: #{ShopifyAPI.credit_left}"
+									  puts "Product # #{c_count} of this collection copied, API limit left: #{ShopifyAPI.credit_left}"
 				  					c_count += 1
 				  					if ShopifyAPI.credit_left < 10
 									    sleep 10.seconds
