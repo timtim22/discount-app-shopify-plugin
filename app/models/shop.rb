@@ -99,21 +99,29 @@ class Shop < ApplicationRecord
 							  end
 						  	c_page += 1
 						  	products.each do |product|
-
-								  hashed_product = JSON.parse product.to_json
-								  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
-								  hashed_product['variants'].each do |v|
-								  	v.delete 'image_id'
-								  end
-								  target_shop.with_shopify_session do
-									  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
-									  self.safe_request { ShopifyAPI::Collect.create!({product_id: new_product.id, collection_id: new_custom_collection.id}) }
-									  custom_collection_product_ids << product.id
-									  puts "Product # #{c_count} of this collection copied, API limit left: #{ShopifyAPI.credit_left}"
-				  					c_count += 1
-				  					if ShopifyAPI.credit_left < 10
-									    sleep 10.seconds
+						  		if custom_collection_product_ids.include?(product.id)
+						  			target_shop.with_shopify_session do
+						  				present_product = ShopifyAPI::Product.find(:first, params: {title: product.title})
+						  				self.safe_request { ShopifyAPI::Collect.create({product_id: present_product.id, collection_id: new_custom_collection.id}) }
+						  				puts "Product #{product.id} added to collection, API limit left: #{ShopifyAPI.credit_left}"
+						  			end
+						  		else
+									  hashed_product = JSON.parse product.to_json
+									  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
+									  hashed_product['variants'].each do |v|
+									  	v.delete 'image_id'
 									  end
+									  target_shop.with_shopify_session do
+										  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
+										  puts "Product #{product.id} copied, API limit left: #{ShopifyAPI.credit_left}"
+										  self.safe_request { ShopifyAPI::Collect.create({product_id: new_product.id, collection_id: new_custom_collection.id}) }
+										  custom_collection_product_ids << product.id
+										  puts "Product #{product.id} added to collection, API limit left: #{ShopifyAPI.credit_left}"
+					  					c_count += 1
+					  					if ShopifyAPI.credit_left < 10
+										    sleep 10.seconds
+										  end
+										end
 									end
 						  	end
 						  	products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})

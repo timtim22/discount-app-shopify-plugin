@@ -12,7 +12,7 @@ class ApplicationRecord < ActiveRecord::Base
       if retries < max_retries
         retries += 1
         puts 'sleeping'
-        sleep 10.seconds
+        sleep 20.seconds
         retry
       else
         raise error
