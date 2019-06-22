@@ -5,6 +5,8 @@ class ApplicationRecord < ActiveRecord::Base
     max_retries = 3
     begin
       yield
+    rescue ActiveResource::ResourceInvalid => error
+      puts 'Skiping invalid resource.'
     rescue ActiveResource::ClientError => error
       retries ||= 0
       if retries < max_retries
