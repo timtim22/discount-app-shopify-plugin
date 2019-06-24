@@ -18,6 +18,7 @@ class ApplicationRecord < ActiveRecord::Base
         raise error
       end
     rescue ActiveResource::ServerError => error
+      puts 'Server Error'
       retries ||= 0
       if retries < max_retries
         retries += 1

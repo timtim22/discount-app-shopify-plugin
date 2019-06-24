@@ -101,9 +101,12 @@ class Shop < ApplicationRecord
 						  	products.each do |product|
 						  		if custom_collection_product_ids.include?(product.id)
 						  			target_shop.with_shopify_session do
-						  				present_product = ShopifyAPI::Product.find(:first, params: {title: product.title})
+						  				present_product = self.safe_request { ShopifyAPI::Product.find(:first, params: {title: product.title}) }
 						  				self.safe_request { ShopifyAPI::Collect.create({product_id: present_product.id, collection_id: new_custom_collection.id}) }
 						  				puts "Product #{product.id} added to collection, API limit left: #{ShopifyAPI.credit_left}"
+						  				if ShopifyAPI.credit_left < 10
+										    sleep 10.seconds
+										  end
 						  			end
 						  		else
 									  hashed_product = JSON.parse product.to_json
