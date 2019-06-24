@@ -3,12 +3,12 @@ class ApplicationRecord < ActiveRecord::Base
 
   def safe_request
     max_retries = 3
+    retries = 0
     begin
       yield
     rescue ActiveResource::ResourceInvalid => error
       puts 'Skiping invalid resource.'
     rescue ActiveResource::ClientError => error
-      retries ||= 0
       if retries < max_retries
         retries += 1
         puts "sleeping retry # #{retries}"
@@ -19,9 +19,17 @@ class ApplicationRecord < ActiveRecord::Base
       end
     rescue ActiveResource::ServerError => error
       puts 'Server Error'
-      retries ||= 0
       if retries < max_retries
         retries += 1
+        retry
+      else
+        raise error
+      end
+    rescue Exception => ex
+      puts "An error of type #{ex.class} happened, message is #{ex.message}"
+      if retries < max_retries
+        retries += 1
+        sleep (retries*20).seconds
         retry
       else
         raise error

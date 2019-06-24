@@ -37,7 +37,7 @@ class Shop < ApplicationRecord
 		end
 	end
 
-	def transfer(target_shop_id)
+	def transfer(target_shop_id, price_multiplier=nil)
 		target_shop = Shop.find(target_shop_id)
 		attributes_to_remove =  %w(admin_graphql_api_id created_at updated_at id published_at)
 
@@ -47,7 +47,7 @@ class Shop < ApplicationRecord
 		self.with_shopify_session do
 
 			#copy smart collections
-			all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
+			all_smart_collections = self.safe_request { ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page}) }
 			while !all_smart_collections.empty?
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
@@ -65,14 +65,14 @@ class Shop < ApplicationRecord
 					  end
 					end
 				end
-				all_smart_collections = ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page})
+				all_smart_collections = self.safe_request { ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page}) }
 			end
 
 			#copy custom collections
 			page = 1
 			count = 1
 			custom_collection_product_ids = []
-			all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
+			all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
 			while !all_custom_collections.empty?
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
@@ -84,7 +84,7 @@ class Shop < ApplicationRecord
 					  hashed_custom_collection = JSON.parse custom_collection.to_json
 					  attributes_to_remove.each {|attribute| hashed_custom_collection.delete attribute }
 					  new_custom_collection = self.safe_request { ShopifyAPI::CustomCollection.create hashed_custom_collection }
-					  puts "Custom collection # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
+					  puts "Custom collection # #{custom_collection.id} copied, API limit left: #{ShopifyAPI.credit_left}"
 					  count += 1
 					  if ShopifyAPI.credit_left < 10
 					    sleep 10.seconds
@@ -92,7 +92,7 @@ class Shop < ApplicationRecord
 					  self.with_shopify_session do
 						  c_page = 1
 						  c_count = 1
-						  products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
+						  products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection}) }
 						  while !products.empty?
 						  	if ShopifyAPI.credit_left < 10
 							    sleep 10.seconds
@@ -113,6 +113,10 @@ class Shop < ApplicationRecord
 									  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
 									  hashed_product['variants'].each do |v|
 									  	v.delete 'image_id'
+									  	if price_multiplier
+												v['price'] = v['price'].to_i * price_multiplier if v['price'] && v['price'].to_i > 0
+												v['compare_at_price'] = v['compare_at_price'] * price_multiplier if v['compare_at_price'] && v['compare_at_price'].to_i > 0
+											end
 									  end
 									  target_shop.with_shopify_session do
 										  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
@@ -127,17 +131,17 @@ class Shop < ApplicationRecord
 										end
 									end
 						  	end
-						  	products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection})
+						  	products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: c_page, collection_id: custom_collection}) }
 						  end
 						end
 					end
 				end
-				all_custom_collections = ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page})
+				all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
 			end
 
 			page = 1
 			count = 1
-			products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
+			products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
 			while !products.empty?
 				target_shop.with_shopify_session do
 					if ShopifyAPI.credit_left < 10
@@ -147,6 +151,13 @@ class Shop < ApplicationRecord
 						unless custom_collection_product_ids.include? product.id
 						  hashed_product = JSON.parse product.to_json
 						  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
+						  hashed_product['variants'].each do |v|
+						  	v.delete 'image_id'
+						  	if price_multiplier
+									v['price'] = v['price'].to_i * price_multiplier if v['price'] && v['price'].to_i > 0
+									v['compare_at_price'] = v['compare_at_price'] * price_multiplier if v['compare_at_price'] && v['compare_at_price'].to_i > 0
+								end
+						  end
 						  self.safe_request { ShopifyAPI::Product.create hashed_product }
 						  puts "Product # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
 						  count += 1
@@ -156,10 +167,8 @@ class Shop < ApplicationRecord
 						end
 					end
 				end
-				products = ShopifyAPI::Product.find(:all, params: {limit: '250', page: page})
+				products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
 			end
-
 		end
 	end
-
 end

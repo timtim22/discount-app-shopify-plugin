@@ -4,6 +4,6 @@ class DuplicateStoreWorker
 
   def perform(*args)
     shop = Shop.find(args[0])
-    shop.transfer args[1]
+    shop.transfer(args[1], args[2])
   end
 end
