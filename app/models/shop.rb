@@ -40,6 +40,121 @@ class Shop < ApplicationRecord
 	def transfer(target_shop_id, price_multiplier=nil)
 		target_shop = Shop.find(target_shop_id)
 		attributes_to_remove =  %w(admin_graphql_api_id created_at updated_at id published_at)
+		product_map = {}
+		custom_collection_map = {}
+
+
+		self.with_shopify_session do
+
+			page = 1
+			count = 1
+			#copy smart collections
+			all_smart_collections = self.safe_request { ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page}) }
+			while !all_smart_collections.empty?
+				if ShopifyAPI.credit_left < 10
+			    sleep 10.seconds
+			  end
+				page += 1
+				target_shop.with_shopify_session do
+					all_smart_collections.each do |smart_collection|
+					  hashed_smart_collection = JSON.parse smart_collection.to_json
+					  attributes_to_remove.each {|attribute| hashed_smart_collection.delete attribute }
+					  self.safe_request { ShopifyAPI::SmartCollection.create hashed_smart_collection }
+					  puts "Smart collection # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
+					  count += 1
+					  if ShopifyAPI.credit_left < 10
+					    sleep 10.seconds
+					  end
+					end
+				end
+				all_smart_collections = self.safe_request { ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page}) }
+			end
+
+			#copy custom collections
+			page = 1
+			custom_collection_product_ids = []
+			all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
+			while !all_custom_collections.empty?
+				if ShopifyAPI.credit_left < 10
+			    sleep 10.seconds
+			  end
+				page += 1
+				target_shop.with_shopify_session do
+					all_custom_collections.each do |custom_collection|
+
+					  hashed_custom_collection = JSON.parse custom_collection.to_json
+					  attributes_to_remove.each {|attribute| hashed_custom_collection.delete attribute }
+					  new_custom_collection = self.safe_request { ShopifyAPI::CustomCollection.create hashed_custom_collection }
+					  puts "Custom collection # #{custom_collection.id} copied, API limit left: #{ShopifyAPI.credit_left}"
+					  custom_collection_map[custom_collection.id] = new_custom_collection.id
+					  if ShopifyAPI.credit_left < 10
+					    sleep 10.seconds
+					  end
+					end
+				end
+				all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
+			end
+
+			#copy products
+			page = 1
+			products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
+			while !products.empty?
+				target_shop.with_shopify_session do
+					if ShopifyAPI.credit_left < 10
+				    sleep 10.seconds
+				  end
+					products.each do |product|
+						unless custom_collection_product_ids.include? product.id
+						  hashed_product = JSON.parse product.to_json
+						  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
+						  hashed_product['variants'].each do |v|
+						  	v.delete 'image_id'
+						  	if price_multiplier
+									v['price'] = v['price'].to_i * price_multiplier if v['price'] && v['price'].to_i > 0
+									v['compare_at_price'] = v['compare_at_price'] * price_multiplier if v['compare_at_price'] && v['compare_at_price'].to_i > 0
+								end
+						  end
+						  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
+						  puts "Product # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
+						  product_map[product.id] = new_product.id
+						  if ShopifyAPI.credit_left < 10
+						    sleep 10.seconds
+						  end
+						end
+					end
+				end
+				products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
+			end
+
+			#copy product to custom_collection relation i-e collect
+			page = 1
+			count = 1
+			all_collects = self.safe_request { ShopifyAPI::Collect.find(:all, params: {limit: '250', page: page}) }
+			while !all_collects.empty?
+				if ShopifyAPI.credit_left < 10
+			    sleep 10.seconds
+			  end
+				page += 1
+				target_shop.with_shopify_session do
+					all_collects.each do |collect|
+					  hashed_collect = JSON.parse collect.to_json
+					  attributes_to_remove.each {|attribute| hashed_collect.delete attribute }
+					  self.safe_request { ShopifyAPI::Collect.create({product_id: product_map[collect.product_id], collection_id: custom_collection_map[collect.collection_id]}) }
+					  puts "Collect # #{count} created, API limit left: #{ShopifyAPI.credit_left}"
+					  count += 1
+					  if ShopifyAPI.credit_left < 10
+					    sleep 10.seconds
+					  end
+					end
+				end
+				all_collects = self.safe_request { ShopifyAPI::Collect.find(:all, params: {limit: '250', page: page}) }
+			end
+		end
+	end
+
+	def transfer_old(target_shop_id, price_multiplier=nil)
+		target_shop = Shop.find(target_shop_id)
+		attributes_to_remove =  %w(admin_graphql_api_id created_at updated_at id published_at)
 
 
 		page = 1
