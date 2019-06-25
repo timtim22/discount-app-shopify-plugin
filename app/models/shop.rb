@@ -98,10 +98,8 @@ class Shop < ApplicationRecord
 
 			page = 1
 			products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
-			puts 'h'
 			while !products.empty?
 				products.each do |product|
-					puts 'h1'
 				  hashed_product = JSON.parse product.to_json
 				  attributes_to_remove.each {|attribute| hashed_product.delete attribute }
 				  hashed_product['variants'].each do |v|
@@ -111,11 +109,8 @@ class Shop < ApplicationRecord
 							v['compare_at_price'] = (v['compare_at_price'].to_i * price_multiplier).round if v['compare_at_price'] && v['compare_at_price'].to_i > 0
 						end
 				  end
-				  puts 'h2'
 					target_shop.with_shopify_session do
-						puts hashed_product
 					  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
-					  puts 'h4'
 					  puts "Product # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
 					  product_map[product.id] = new_product.id
 				    sleep 10.seconds if ShopifyAPI.credit_left < 10
