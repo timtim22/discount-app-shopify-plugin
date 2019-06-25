@@ -7,8 +7,10 @@ class ApplicationRecord < ActiveRecord::Base
     begin
       yield
     rescue ActiveResource::ResourceInvalid => error
+      puts "An error of type #{error.class} happened, message is #{error.message}"
       puts 'Skiping invalid resource.'
     rescue ActiveResource::ClientError => error
+      puts "An error of type #{error.class} happened, message is #{error.message}"
       if retries < max_retries
         retries += 1
         puts "sleeping retry # #{retries}"
@@ -18,6 +20,7 @@ class ApplicationRecord < ActiveRecord::Base
         raise error
       end
     rescue ActiveResource::ServerError => error
+      puts "An error of type #{error.class} happened, message is #{error.message}"
       puts 'Server Error'
       if retries < max_retries
         retries += 1
