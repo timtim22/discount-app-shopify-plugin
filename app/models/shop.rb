@@ -108,7 +108,7 @@ class Shop < ApplicationRecord
 				  	v.delete 'image_id'
 				  	if price_multiplier
 							v['price'] = (v['price'].to_i * price_multiplier).round if v['price'] && v['price'].to_i > 0
-							v['compare_at_price'] = (v['compare_at_price'] * price_multiplier).round if v['compare_at_price'] && v['compare_at_price'].to_i > 0
+							v['compare_at_price'] = (v['compare_at_price'].to_i * price_multiplier).round if v['compare_at_price'] && v['compare_at_price'].to_i > 0
 						end
 				  end
 				  puts 'h2'
