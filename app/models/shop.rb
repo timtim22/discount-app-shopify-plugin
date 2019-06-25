@@ -107,8 +107,8 @@ class Shop < ApplicationRecord
 				  hashed_product['variants'].each do |v|
 				  	v.delete 'image_id'
 				  	if price_multiplier
-							v['price'] = v['price'].to_i * price_multiplier if v['price'] && v['price'].to_i > 0
-							v['compare_at_price'] = v['compare_at_price'] * price_multiplier if v['compare_at_price'] && v['compare_at_price'].to_i > 0
+							v['price'] = (v['price'].to_i * price_multiplier).round if v['price'] && v['price'].to_i > 0
+							v['compare_at_price'] = (v['compare_at_price'] * price_multiplier).round if v['compare_at_price'] && v['compare_at_price'].to_i > 0
 						end
 				  end
 				  puts 'h2'
