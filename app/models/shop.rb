@@ -56,7 +56,6 @@ class Shop < ApplicationRecord
 				if ShopifyAPI.credit_left < 10
 			    sleep 10.seconds
 			  end
-				page += 1
 				target_shop.with_shopify_session do
 					all_smart_collections.each do |smart_collection|
 					  hashed_smart_collection = JSON.parse smart_collection.to_json
@@ -69,6 +68,7 @@ class Shop < ApplicationRecord
 					  end
 					end
 				end
+				page += 1
 				all_smart_collections = self.safe_request { ShopifyAPI::SmartCollection.find(:all, params: {limit: '250', page: page}) }
 			end
 
@@ -78,7 +78,6 @@ class Shop < ApplicationRecord
 			custom_collection_product_ids = []
 			all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
 			while !all_custom_collections.empty?
-				page += 1
 				all_custom_collections.each do |custom_collection|
 				  hashed_custom_collection = JSON.parse custom_collection.to_json
 				  attributes_to_remove.each {|attribute| hashed_custom_collection.delete attribute }
@@ -90,6 +89,7 @@ class Shop < ApplicationRecord
 				    sleep 10.seconds if ShopifyAPI.credit_left < 10
 					end
 				end
+				page += 1
 				all_custom_collections = self.safe_request { ShopifyAPI::CustomCollection.find(:all, params: {limit: '250', page: page}) }
 		    sleep 10.seconds if ShopifyAPI.credit_left < 10
 			end
@@ -111,11 +111,12 @@ class Shop < ApplicationRecord
 				  end
 					target_shop.with_shopify_session do
 					  new_product = self.safe_request { ShopifyAPI::Product.create hashed_product }
-					  puts "Product # #{count} copied, API limit left: #{ShopifyAPI.credit_left}"
+					  puts "Product # #{product.id} copied, API limit left: #{ShopifyAPI.credit_left}"
 					  product_map[product.id] = new_product.id
 				    sleep 10.seconds if ShopifyAPI.credit_left < 10
 					end
 				end
+				page += 1
 				products = self.safe_request { ShopifyAPI::Product.find(:all, params: {limit: '250', page: page}) }
 		    sleep 10.seconds if ShopifyAPI.credit_left < 10
 			end
@@ -126,8 +127,6 @@ class Shop < ApplicationRecord
 			count = 1
 			all_collects = self.safe_request { ShopifyAPI::Collect.find(:all, params: {limit: '250', page: page}) }
 			while !all_collects.empty?
-				page += 1
-
 				all_collects.each do |collect|
 				  hashed_collect = JSON.parse collect.to_json
 				  attributes_to_remove.each {|attribute| hashed_collect.delete attribute }
@@ -138,6 +137,7 @@ class Shop < ApplicationRecord
 					  sleep 10.seconds if ShopifyAPI.credit_left < 10
 					end
 				end
+				page += 1
 				all_collects = self.safe_request { ShopifyAPI::Collect.find(:all, params: {limit: '250', page: page}) }
 				sleep 10.seconds if ShopifyAPI.credit_left < 10
 			end
