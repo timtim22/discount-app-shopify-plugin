@@ -132,8 +132,9 @@ class Shop < ApplicationRecord
 				  attributes_to_remove.each {|attribute| hashed_collect.delete attribute }
 				  target_shop.with_shopify_session do
 					  self.safe_request { ShopifyAPI::Collect.create({product_id: product_map[collect.product_id], collection_id: custom_collection_map[collect.collection_id]}) }
-					  puts "Collect # #{count} created, API limit left: #{ShopifyAPI.credit_left}"
 					  count += 1
+					  credits = self.safe_request { ShopifyAPI.credit_left }
+					  puts "Collect # #{count} created, API limit left: #{credits}"
 					  sleep 10.seconds if ShopifyAPI.credit_left < 10
 					end
 				end

@@ -24,7 +24,7 @@ class SalesController < ShopifyApp::AuthenticatedController
         name: "ExpressSales Monthly Charge",
         price: 8.99,
         return_url: ENV['DOMAIN']+"/activatecharge",
-        trial_days: 4)
+        trial_days: 7)
 
       if recurring_application_charge.save
         @ru = recurring_application_charge.confirmation_url

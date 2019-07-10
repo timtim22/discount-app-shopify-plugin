@@ -16,8 +16,6 @@ class ApplicationRecord < ActiveRecord::Base
         puts "sleeping retry # #{retries}"
         sleep (retries*20).seconds
         retry
-      else
-        raise error
       end
     rescue ActiveResource::ServerError => error
       puts "An error of type #{error.class} happened, message is #{error.message}"
@@ -25,8 +23,6 @@ class ApplicationRecord < ActiveRecord::Base
       if retries < max_retries
         retries += 1
         retry
-      else
-        raise error
       end
     rescue Exception => ex
       puts "An error of type #{ex.class} happened, message is #{ex.message}"
@@ -34,8 +30,6 @@ class ApplicationRecord < ActiveRecord::Base
         retries += 1
         sleep (retries*20).seconds
         retry
-      else
-        raise error
       end
     end
   end
