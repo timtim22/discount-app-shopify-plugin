@@ -62,7 +62,7 @@ class SalesController < ShopifyApp::AuthenticatedController
       @sale.end_time = nil
     else
       @sale.start_time = DateTime.parse(params[:sale][:parsed_start_date])
-      @sale.end_time = DateTime.parse(params[:sale][:parsed_end_date])
+      @sale.end_time = DateTime.parse(params[:sale][:parsed_end_date]) if (params[:sale][:parsed_end_date] && !params[:sale][:parsed_end_date].blank?)
     end
     respond_to do |format|
       if @sale.save
@@ -82,7 +82,7 @@ class SalesController < ShopifyApp::AuthenticatedController
 
         if @sale.scheduled
           ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
-          DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id)
+          DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id) if @sale.end_time
         elsif @sale.Enabled?
           @sale.update(status: 2)
           ActivateSaleWorker.perform_async(@sale.id)
@@ -131,13 +131,17 @@ class SalesController < ShopifyApp::AuthenticatedController
           @sale.end_time = nil
         else
           @sale.start_time = DateTime.parse(params[:sale][:parsed_start_date])
-          @sale.end_time = DateTime.parse(params[:sale][:parsed_end_date])
+          if (params[:sale][:parsed_end_date] && !params[:sale][:parsed_end_date].blank?)
+            @sale.end_time = DateTime.parse(params[:sale][:parsed_end_date])
+          else
+            @sale.end_time = nil
+          end
         end
         @sale.save
         if @sale.Enabled?
           if @sale.scheduled
             ActivateSaleWorker.perform_at(@sale.start_time, @sale.id)
-            DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id)
+            DeactivateSaleWorker.perform_at(@sale.end_time, @sale.id) if @sale.end_time
           else
             @sale.update(status: 2)
             ActivateSaleWorker.perform_async(@sale.id)

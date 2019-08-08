@@ -5,7 +5,6 @@ class ActivateSaleWorker
 
   def self.unique_args(args)
     Sale.find(args[0]).shop_id
-    puts 'Rescheduling for later by unique args'
   end
 
   def perform(*args)
