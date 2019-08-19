@@ -15,6 +15,7 @@ class SalesController < ShopifyApp::AuthenticatedController
   end
 
   def index
+    puts session[:shopify]
     ls = Shop.find_by(shopify_domain: session[:shopify_domain])
     if ls.activated
       @shop = ShopifyAPI::Shop.current
