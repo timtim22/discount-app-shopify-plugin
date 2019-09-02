@@ -1,6 +1,6 @@
 class Sale < ApplicationRecord
   belongs_to :shop
-  has_many :sale_collection, :dependent => :delete_all
+  has_one :sale_collection, :dependent => :delete_all
   has_many :old_price, :dependent => :delete_all
 
 	enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
@@ -13,12 +13,9 @@ class Sale < ApplicationRecord
 		sale_id = self.id
 		if sale_target == 'Whole Store'
 			products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants"})
-			page = 1
-			while !products.empty?
+
+			loop do
 				products.each do |product|
-					if ShopifyAPI.credit_left < 5
-						sleep 10.seconds
-					end
 					old_price = OldPrice.find_by(sale_id: sale_id, product_id: product.id.to_s)
 					if old_price.nil?
 						variants = {}
@@ -40,35 +37,29 @@ class Sale < ApplicationRecord
 							product.save
 							old_price.save
 						end
+						sleep 10.seconds if ShopifyAPI.credit_left < 5
 					end
 				end
-				if products.length == 250
-					page += 1
-					products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: "id,variants", page: page})
-				else
-					products = []
-				end
+				break unless products.next_page?
+				products = products.fetch_next_page
+				sleep 10.seconds if ShopifyAPI.credit_left < 5
 			end
 
 		elsif sale_target == 'Specific collections'
 			sc = SaleCollection.find_by(sale_id: sale_id)
 			if sc
-				collections = SaleCollection.find_by(sale_id: sale_id).collections
+				collections = sc.collections.keys
 			else
-				collections = {}
+				collections = []
 			end
 			if collections.empty?
 				return -1
 			end
-			collections.each do |collection, title|
+			collections.each do |collection|
 				products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants"})
-				page = 1
-				while !products.empty?
+
+				loop do
 					products.each do |product|
-						if ShopifyAPI.credit_left < 5
-							sleep 10.seconds
-							puts "Sleeping"
-						end
 						old_price = OldPrice.find_by(sale_id: sale_id, product_id: product.id.to_s)
 				    if old_price.nil?
 				    	variants = {}
@@ -90,14 +81,12 @@ class Sale < ApplicationRecord
 								product.save
 								old_price.save
 			    		end
+							sleep 10.seconds if ShopifyAPI.credit_left < 10
 			    	end
 			    end
-			    if products.length == 250
-				    page += 1
-			    	products = ShopifyAPI::Product.find(:all, params: {collection_id: collection, limit: "250", fields: "id, variants", page: page})
-			    else
-			    	products = []
-			    end
+			    break unless products.next_page?
+					products = products.fetch_next_page
+					sleep 10.seconds if ShopifyAPI.credit_left < 5
 			  end
 			end
 		end

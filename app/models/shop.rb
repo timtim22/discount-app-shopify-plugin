@@ -11,15 +11,12 @@ class Shop < ApplicationRecord
 	def nullify_cap
 		self.with_shopify!
 
-		pc = ShopifyAPI::Product.count
-		count = 0
-		page = 1
-		while count < pc
-			products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: 'id,variants', page: page})
+		products = ShopifyAPI::Product.find(:all, params: {limit: '250', fields: 'id,variants'})
+
+		loop do
 			products.each do |product|
-				if ShopifyAPI.credit_left < 5
-					sleep 10.seconds
-				end
+				sleep 10.seconds if ShopifyAPI.credit_left < 10
+
 				check = false
 				product.variants.each do |variant|
 					if !variant.compare_at_price.nil?
@@ -31,9 +28,9 @@ class Shop < ApplicationRecord
 					product.save
 				end
 			end
-			page +=1
-			count += 250
-			puts count
+
+			break unless products.has_next?
+			products = products.fetch_next_page
 		end
 	end
 

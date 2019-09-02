@@ -13,7 +13,7 @@ class ActivateSaleWorker
       if !sale.Activating?
         sale.update(status: 2)
       end
-		  session = sale.shop.with_shopify!
+		  sale.shop.with_shopify!
 		  sale.activate_sale
 		end
     sale.update(status: 0)

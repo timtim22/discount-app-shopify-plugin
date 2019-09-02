@@ -15,7 +15,7 @@ class DeactivateSaleWorker
     if !sale.Deactivating?
       sale.update(status: 3)
     end
-	  session = sale.shop.with_shopify!
+	  sale.shop.with_shopify!
 	  sale.deactivate_sale
 	  sale.update(status: 1)
     return

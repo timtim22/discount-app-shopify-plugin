@@ -1,32 +1,33 @@
 class SalesController < ShopifyApp::AuthenticatedController
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
 
-  # GET /sales
-  # GET /sales.json
-
   def activate_charge
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.find(request.params['charge_id'])
     if recurring_application_charge.status == "accepted"
       if recurring_application_charge.activate
-        Shop.find_by(shopify_domain: session[:shopify_domain]).update(activated: true)
+        shop = Shop.find(session[:shopify])
+        shop.activated = true
+        shop.currency ||= ShopifyAPI::Shop.current.currency
+        shop.save
         redirect_to root_url
       end
     end
   end
 
   def index
-    puts session[:shopify]
-    ls = Shop.find_by(shopify_domain: session[:shopify_domain])
-    if ls.activated
-      @shop = ShopifyAPI::Shop.current
-      @sales = Sale.where(shop_id: ls.id).order(:id)
+    @shop = Shop.find(session[:shopify])
+    if @shop.activated
+      if @shop.currency.nil?
+        @shop.currency = ShopifyAPI::Shop.current.currency
+        @shop.save
+      end
+      @sales = Sale.where(shop_id: shop.id).order(:id)
     else
       recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new(
         name: "ExpressSales Monthly Charge",
         price: 8.99,
         return_url: ENV['DOMAIN']+"/activatecharge",
         trial_days: 7)
-
       if recurring_application_charge.save
         @ru = recurring_application_charge.confirmation_url
         render 'charge_redirect', :layout => false
@@ -34,27 +35,22 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
   end
 
-  # GET /sales/1
-  # GET /sales/1.json
   def show
     if @sale.sale_target == "Specific collections"
       @sale_collections = SaleCollection.find_by(sale_id: @sale.id)
     end
   end
 
-  # GET /sales/new
   def new
     @sale = Sale.new
-    @currency = ShopifyAPI::Shop.current.currency
+    @currency = Shop.find(session[:shopify]).currency
   end
 
-  # GET /sales/1/edit
   def edit
     @sale_collections = SaleCollection.find_by(sale_id: @sale.id)
+    @currency = Shop.find(session[:shopify]).currency
   end
 
-  # POST /sales
-  # POST /sales.json
   def create
     @sale = Sale.new(sale_params)
     @sale.shop_id = Shop.find_by(shopify_domain: session[:shopify_domain]).id
@@ -96,8 +92,6 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
   end
 
-  # PATCH/PUT /sales/1
-  # PATCH/PUT /sales/1.json
   def update
     if @sale.Enabled?
       check2 = true
@@ -164,8 +158,6 @@ class SalesController < ShopifyApp::AuthenticatedController
     end
   end
 
-  # DELETE /sales/1
-  # DELETE /sales/1.json
   def destroy
     @sale.destroy
     respond_to do |format|
@@ -186,11 +178,9 @@ class SalesController < ShopifyApp::AuthenticatedController
             sale.update(status: 0)
             ActivateSaleWorker.perform_at(sale.start_time, sale.id)
             DeactivateSaleWorker.perform_at(sale.end_time, sale.id)
-
           else
             sale.update(status: 2)
             ActivateSaleWorker.perform_async(sale.id)
-
           end
         elsif sale.Activating? || sale.Deactivating?
           redirect_to sales_path, notice: 'Can not modify a sale that is being processed.'
