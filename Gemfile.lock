@@ -218,11 +218,11 @@ GEM
       omniauth-shopify-oauth2 (~> 2.1.0)
       rails (> 5.2.1)
       shopify_api (>= 7.0.0)
-    sidekiq (6.0.0)
-      connection_pool (>= 2.2.2)
-      rack (>= 2.0.0)
-      rack-protection (>= 2.0.0)
-      redis (>= 4.1.0)
+    sidekiq (5.2.7)
+      connection_pool (~> 2.2, >= 2.2.2)
+      rack (>= 1.5.0)
+      rack-protection (>= 1.5.0)
+      redis (>= 3.3.5, < 5)
     sidekiq-unique-jobs (6.0.13)
       concurrent-ruby (~> 1.0, >= 1.0.5)
       sidekiq (>= 4.0, < 7.0)
@@ -281,7 +281,7 @@ DEPENDENCIES
   sass-rails (~> 5.0)
   selenium-webdriver
   shopify_app
-  sidekiq
+  sidekiq (= 5.2.7)
   sidekiq-unique-jobs
   spring
   spring-watcher-listen (~> 2.0.0)
