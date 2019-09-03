@@ -4,7 +4,7 @@ class Shop < ApplicationRecord
   include ShopifyApp::SessionStorage
 
   def with_shopify!
-		session = ShopifyAPI::Session.new(shopify_domain, shopify_token)
+		session = ShopifyAPI::Session.new(domain: shopify_domain, token: shopify_token, api_version: ShopifyApp.configuration.api_version)
 		ShopifyAPI::Base.activate_session(session)
 	end
 
