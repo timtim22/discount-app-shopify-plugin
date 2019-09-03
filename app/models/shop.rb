@@ -8,6 +8,10 @@ class Shop < ApplicationRecord
 		ShopifyAPI::Base.activate_session(session)
 	end
 
+	def api_version
+		ShopifyApp.configuration.api_version
+	end
+
 	def nullify_cap
 		self.with_shopify!
 
