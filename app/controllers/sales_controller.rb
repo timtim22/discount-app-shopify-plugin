@@ -21,7 +21,7 @@ class SalesController < ShopifyApp::AuthenticatedController
         @shop.currency = ShopifyAPI::Shop.current.currency
         @shop.save
       end
-      @sales = Sale.where(shop_id: shop.id).order(:id)
+      @sales = Sale.where(shop_id: @shop.id).order(:id)
     else
       recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new(
         name: "ExpressSales Monthly Charge",
