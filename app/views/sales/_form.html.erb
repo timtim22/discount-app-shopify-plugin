@@ -171,10 +171,14 @@
       $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
     })
     $('#submit-btn').click(function(e){
-      e.preventDefault();
-      document.getElementById("sale_parsed_start_date").value = $("#datetimepicker1").data("DateTimePicker").viewDate().toISOString();
-      document.getElementById("sale_parsed_end_date").value = $("#datetimepicker2").data("DateTimePicker").viewDate().toISOString();
-      $('form#sales_form').submit();
+      debugger;
+      if($(this).closest('form')[0].checkValidity()){
+        e.preventDefault();
+        document.getElementById("sale_parsed_start_date").value = $("#datetimepicker1").data("DateTimePicker").viewDate().toISOString();
+        document.getElementById("sale_parsed_end_date").value = $("#datetimepicker2").data("DateTimePicker").viewDate().toISOString();
+        $('form#sales_form').submit();
+      }
+
     })
   });
 
