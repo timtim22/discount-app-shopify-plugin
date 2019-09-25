@@ -1,5 +1,5 @@
 <article>
-  <%= form_with(model: sale, local: true) do |form| %>
+  <%= form_with(model: sale, local: true, id: 'sales_form') do |form| %>
     <% if sale.errors.any? %>
       <div class="alert error" id="error_explanation">
         <dl>
@@ -25,7 +25,7 @@
           <div class="card">
             <div class="column one-half">
               <p><b>Sale title</b></p>
-              <%= form.text_field :title %>
+              <%= form.text_field :title, required: true %>
               <br>
               <p><b>Sale type</b></p>
               <div class="row side-elements">
@@ -34,15 +34,15 @@
               </div>
               <p><b>Amount</b></p>
               <div class="input-group">
-                <%= form.number_field :amount %>
+                <%= form.number_field :amount, required: true %>
                 <span class="append" id="amount_suffix">%</span>
               </div>
             </div>
             <div class="column one-half">
               <p>Schedule your sale?</p>
               <div class="row side-elements">
-                <label><%= form.radio_button :scheduled, "false", onClick: "document.getElementById('schedule').style.display='none';" %> No</label>
-                <label><%= form.radio_button :scheduled, "true", onClick: "document.getElementById('schedule').style.display='block';" %> Yes</label>
+                <label><%= form.radio_button :scheduled, "false", onClick: "document.getElementById('schedule').style.display='none';document.getElementById('sale_start_date').required = false;" %> No</label>
+                <label><%= form.radio_button :scheduled, "true", onClick: "document.getElementById('schedule').style.display='block';document.getElementById('sale_start_date').required = true;" %> Yes</label>
               </div>
             </div>
           </div>
@@ -89,26 +89,6 @@
           <p style="color:red;">* Both start and end time are required</p>
 
         </div>
-        <script type="text/javascript">
-          $(function () {
-            $('#datetimepicker1').datetimepicker({
-              <%= raw("date: new Date('"+@sale.start_time.to_s+"'),") if @sale.start_time %>
-              minDate: new Date().toISOString()
-            });
-            $('#datetimepicker2').datetimepicker({
-              <%= raw("date: new Date('"+@sale.end_time.to_s+"'),") if @sale.end_time %>
-              useCurrent: false //Important! See issue #1075
-            });
-            $("#datetimepicker1").on("dp.change", function (e) {
-              document.getElementById("sale_parsed_start_date").value = e.date.format("YYYY-MM-DD[T]HH:mm Z");
-              $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
-            });
-            $("#datetimepicker2").on("dp.change", function (e) {
-              document.getElementById("sale_parsed_end_date").value = e.date.format("YYYY-MM-DD[T]HH:mm Z");
-              $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
-            });
-          });
-        </script>
       </article>
     </section>
 
@@ -169,12 +149,35 @@
     </section>
 
     <div class="actions" style="margin-left: 1rem;">
-      <%= form.submit %>
+      <%= form.submit id: 'submit-btn' %>
     </div>
   <% end %>
 </article>
 
 <script type="text/javascript">
+  $(function () {
+    $('#datetimepicker1').datetimepicker({
+      <%= raw("date: new Date('"+@sale.start_time.to_s+"'),") if @sale.start_time %>
+      minDate: new Date().toISOString()
+    });
+    $('#datetimepicker2').datetimepicker({
+      <%= raw("date: new Date('"+@sale.end_time.to_s+"'),") if @sale.end_time %>
+      useCurrent: false //Important! See issue #1075
+    });
+    $("#datetimepicker1").on("dp.change", function (e) {
+      $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+    });
+    $("#datetimepicker2").on("dp.change", function (e) {
+      $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+    })
+    $('#submit-btn').click(function(e){
+      e.preventDefault();
+      document.getElementById("sale_parsed_start_date").value = $("#datetimepicker1").data("DateTimePicker").viewDate().toISOString();
+      document.getElementById("sale_parsed_end_date").value = $("#datetimepicker2").data("DateTimePicker").viewDate().toISOString();
+      $('form#sales_form').submit();
+    })
+  });
+
   var collections = <%= @sale_collections ?  raw(@sale_collections.collections.to_json) : {} %>;
 
   (function() {
