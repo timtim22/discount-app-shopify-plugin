@@ -34,8 +34,12 @@ class Sale < ApplicationRecord
 						end
 						if !variants.empty?
 							old_price = OldPrice.new(sale_id: sale_id, product_id: product.id.to_s, variants: variants)
-							product.save
-							old_price.save
+
+							if product.save
+								old_price.save
+							else
+								p product.errors.messages
+							end
 						end
 						sleep 10.seconds if ShopifyAPI.credit_left < 5
 					end
