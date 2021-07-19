@@ -1,5 +1,8 @@
-class SalesController < ShopifyApp::AuthenticatedController
+class SalesController < AuthenticatedController
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
+
+include ShopifyApp::EmbeddedApp
+include ShopifyApp::RequireKnownShop
 
   def activate_charge
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.find(request.params['charge_id'])

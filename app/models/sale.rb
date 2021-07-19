@@ -1,11 +1,25 @@
-class Sale < ApplicationRecord
+class Sale
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
+  field :shop_id, type: Integer
+  field :title, type: String
+  field :sale_target, type: Integer, default: 0
+  field :amount, type: Float
+  field :sale_type, type: Integer, default: 0
+  field :status, type: Integer, default: 1
+  field :scheduled, type: Mongoid::Boolean, default: false
+  field :start_time, type: DateTime
+  field :end_time, type: DateTime
+
+
   belongs_to :shop
-  has_one :sale_collection, :dependent => :delete
+  has_one :sale_collection, :dependent => :destroy
   has_many :old_price, :dependent => :delete_all
 
-	enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
-	enum sale_type: [ 'Percentage', 'Fixed Amount Off' ]
-	enum status: ['Enabled', 'Disabled', 'Activating', 'Deactivating']
+	# enum sale_target: [ 'Whole Store', 'Specific collections', 'Specific products' ]
+	# enum sale_type: [ 'Percentage', 'Fixed Amount Off' ]
+	# enum status: ['Enabled', 'Disabled', 'Activating', 'Deactivating']
 	validates :title, presence: true
 	validates :amount, presence: true
 

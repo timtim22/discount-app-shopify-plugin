@@ -1,7 +1,15 @@
-class Shop < ApplicationRecord
-	has_many :sale, :dependent => :destroy
+class Shop
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
-  include ShopifyApp::SessionStorage
+  field :shopify_domain, type: String
+  field :shopify_token, type: String
+  field :currency, type: String
+  field :activated, type: Mongoid::Boolean, default: false
+
+  has_many :sale, :dependent => :destroy
+
+  include ShopifyApp::ShopSessionStorage
 
   def with_shopify!
 		session = ShopifyAPI::Session.new(domain: shopify_domain, token: shopify_token, api_version: ShopifyApp.configuration.api_version)

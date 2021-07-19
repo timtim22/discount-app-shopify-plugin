@@ -1,0 +1,7 @@
+development:
+  clients:
+    default:
+      uri: mongodb+srv://timtim:Xerography22@cluster0.eiwse.mongodb.net/cluster?retryWrites=true&w=majority
+      options:
+        server_selection_timeout: 5
+        raise_not_found_error: false

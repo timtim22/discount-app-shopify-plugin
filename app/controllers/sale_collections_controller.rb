@@ -1,4 +1,4 @@
-class SaleCollectionsController < ShopifyApp::AuthenticatedController
+class SaleCollectionsController < AuthenticatedController
   before_action :set_sale_collection, only: [:show, :edit, :update, :destroy]
 
   # GET /sale_collections

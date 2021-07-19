@@ -21,22 +21,23 @@
 
     <%= render 'layouts/flash_messages' %>
 
-    <script src="https://cdn.shopify.com/s/assets/external/app.js?<%= Time.now.strftime('%Y%m%d%H') %>"></script>
+<script src="https://unpkg.com/@shopify/app-bridge"></script>
 
-    <script type="text/javascript">
-      ShopifyApp.init({
-        apiKey: "<%= ShopifyApp.configuration.api_key %>",
-        shopOrigin: "<%= "https://#{ @shop_session.url }" if @shop_session %>",
-        debug: <%= Rails.env.development? ? 'true' : 'false' %>,
-        forceRedirect: true
-      });
-    </script>
+    <%= content_tag(:div, nil, id: 'shopify-app-init', data: {
+      api_key: ShopifyApp.configuration.api_key,
+      shop_origin: @shop_origin || (@current_shopify_session.domain if @current_shopify_session),
+      debug: Rails.env.development?
+    } ) %>
 
     <% if content_for?(:javascript) %>
       <div id="ContentForJavascript" data-turbolinks-temporary>
         <%= yield :javascript %>
       </div>
     <% end %>
+
+
+
+    
     <hr>
     <div class="container" style="text-align: center">
       <p>Have an issue? Or even a question? <a href="mailto:support@marbgroup.com?Subject=ExpressSales%20support" target="_top">Send a Mail</a> or submit a ticket.</p>
